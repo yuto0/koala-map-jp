@@ -1,89 +1,260 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Koala Map JP (local)</title>
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.8.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.8.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; }
+    header { padding: 12px 16px; border-bottom: 1px solid #eee; }
+    .meta { color: #666; font-size: 12px; margin-top: 4px; }
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+    /* 上：地図 / 下：一覧 */
+    #app {
+      display: grid;
+      grid-template-rows: 60vh 1fr;
+      height: calc(100vh - 58px);
+    }
+    #map { min-height: 240px; }
+    #list {
+      border-top: 1px solid #eee;
+      overflow: auto;
+      padding: 10px;
+      background: #fafafa;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .toolbar input {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      min-width: 240px;
+      background: white;
+    }
+    .pill {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      background: white;
+      color: #444;
+    }
+
+    .cards { display: grid; gap: 10px; }
+    .card {
+      background: white;
+      border: 1px solid #e6e6e6;
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      cursor: pointer;
+    }
+    .card:hover { border-color: #cfcfcf; }
+    .card.active {
+      outline: 2px solid #222;
+      border-color: #222;
+    }
+    .row { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .title { font-weight: 700; }
+    .sub { color: #555; margin-top: 6px; font-size: 13px; }
+    .small { color: #777; margin-top: 6px; font-size: 12px; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>Koala Map JP</strong>（ローカル）</div>
+    <div class="meta">Firestore Emulator → Go API → 地図（Leaflet）</div>
+  </header>
+
+  <div id="app">
+    <div id="map"></div>
+    <div id="list">
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="動物園名 / 都道府県 / 市区町村で検索" />
+        <span id="count" class="pill">読み込み中…</span>
+      </div>
+      <div id="cards" class="cards"></div>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+  </div>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    const API_BASE = "http://localhost:8081";
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
+    // 地図
+    const map = L.map("map").setView([36.2048, 138.2529], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // state
+    let allZoos = [];
+    const markersById = new Map(); // id -> Leaflet marker
+    const cardsById = new Map();   // id -> HTMLElement
+    let activeId = null;
+
+    // UI elements
+    const qInput = document.getElementById("q");
+    const cardsEl = document.getElementById("cards");
+    const countEl = document.getElementById("count");
+
+    qInput.addEventListener("input", () => renderListAndMarkers());
+
+    main().catch(err => {
+      console.error(err);
+      alert("初期化に失敗しました。\n\n" + err.message);
+    });
+
+    async function main() {
+      const res = await fetch(`${API_BASE}/zoos`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const zoos = await res.json();
+      if (!Array.isArray(zoos)) throw new Error("Invalid response: not an array");
+
+      // 0,0 は除外（データ未入力のことが多い）
+      allZoos = zoos.filter(z => typeof z?.lat === "number" && typeof z?.lng === "number" && !(z.lat === 0 && z.lng === 0));
+
+      // 先にマーカー作成
+      for (const z of allZoos) {
+        const marker = L.marker([z.lat, z.lng]).addTo(map);
+        marker.bindPopup(buildPopupHtml(z));
+        marker.on("click", () => setActive(z.id));
+        markersById.set(z.id, marker);
+      }
+
+      // 初期描画
+      renderListAndMarkers();
+
+      // 地図を全体にフィット
+      fitToAll();
+    }
+
+    function renderListAndMarkers() {
+      const q = (qInput.value || "").trim().toLowerCase();
+
+      // フィルタ
+      const filtered = allZoos.filter(z => {
+        const hay = `${z.name || ""} ${z.pref || ""} ${z.city || ""}`.toLowerCase();
+        return q === "" ? true : hay.includes(q);
       });
-    </script>
-  </body>
+
+      // 件数
+      countEl.textContent = `${filtered.length} 件表示`;
+
+      // 一覧を作り直し
+      cardsEl.innerHTML = "";
+      cardsById.clear();
+
+      for (const z of filtered) {
+        const card = buildCard(z);
+        cardsEl.appendChild(card);
+        cardsById.set(z.id, card);
+      }
+
+      // 地図のマーカー表示もフィルタに合わせる（簡易：一旦全部消して再追加）
+      // Leafletはremove/addが簡単なので、小規模ならこれでOK
+      for (const [id, m] of markersById.entries()) {
+        map.removeLayer(m);
+      }
+      for (const z of filtered) {
+        const m = markersById.get(z.id);
+        if (m) m.addTo(map);
+      }
+
+      // アクティブがフィルタで消えたら解除
+      if (activeId && !filtered.some(z => z.id === activeId)) {
+        setActive(null);
+      }
+    }
+
+    function buildCard(z) {
+      const el = document.createElement("div");
+      el.className = "card";
+      el.dataset.id = z.id;
+
+      const place = [z.pref, z.city].filter(Boolean).join(" ");
+      const status = z.status || "";
+      const verified = z.lastVerifiedAt ? `確認日: ${z.lastVerifiedAt}` : "";
+      const url = z.officialUrl ? z.officialUrl : "";
+
+      el.innerHTML = `
+        <div class="row">
+          <div class="title">${escapeHtml(z.name || "(no name)")}</div>
+          <div class="pill">${escapeHtml(status)}</div>
+        </div>
+        <div class="sub">${escapeHtml(place)}</div>
+        <div class="small">${escapeHtml(verified)}</div>
+        ${url ? `<div class="small"><a href="${escapeAttr(url)}" target="_blank" rel="noreferrer">公式サイト</a></div>` : ""}
+      `;
+
+      el.addEventListener("click", () => focusZoo(z.id));
+      return el;
+    }
+
+    function focusZoo(id) {
+      const marker = markersById.get(id);
+      const zoo = allZoos.find(z => z.id === id);
+      if (!marker || !zoo) return;
+
+      setActive(id);
+      map.setView([zoo.lat, zoo.lng], 14, { animate: true });
+      marker.openPopup();
+    }
+
+    function setActive(id) {
+      // 一覧の強調
+      if (activeId && cardsById.get(activeId)) cardsById.get(activeId).classList.remove("active");
+      activeId = id;
+      if (activeId && cardsById.get(activeId)) {
+        const el = cardsById.get(activeId);
+        el.classList.add("active");
+        // スクロールして見える位置へ
+        el.scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    function fitToAll() {
+      const pts = allZoos.map(z => [z.lat, z.lng]);
+      if (pts.length > 0) map.fitBounds(pts, { padding: [30, 30] });
+    }
+
+    function buildPopupHtml(z) {
+      const title = z.name || "(no name)";
+      const place = [z.pref, z.city].filter(Boolean).join(" ");
+      const status = z.status || "";
+      const verified = z.lastVerifiedAt ? `確認日: ${z.lastVerifiedAt}` : "";
+      const url = z.officialUrl ? `<a href="${escapeAttr(z.officialUrl)}" target="_blank" rel="noreferrer">公式サイト</a>` : "";
+
+      return `
+        <div style="min-width:220px">
+          <div><strong>${escapeHtml(title)}</strong></div>
+          <div style="margin-top:4px">${escapeHtml(place)}</div>
+          <div style="margin-top:4px">${escapeHtml(status)}</div>
+          <div style="margin-top:4px">${escapeHtml(verified)}</div>
+          <div style="margin-top:6px">${url}</div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[s]));
+    }
+    function escapeAttr(str) {
+      // 属性用（最低限）
+      return String(str).replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
 </html>
