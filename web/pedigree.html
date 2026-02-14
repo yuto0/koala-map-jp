@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pedigree - Koala Map JP</title>
+
+  <style>
+    :root {
+      --ink: #1c1a16;
+      --ink-soft: #4a4036;
+      --paper: #f3ead8;
+      --paper-deep: #eadcc3;
+      --accent: #8b2a1b;
+      --border: #b8a287;
+      --seal: #b43c2f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #fff7e8 0%, transparent 60%),
+        radial-gradient(900px 500px at 90% -20%, #fff0d8 0%, transparent 55%),
+        linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(45deg, rgba(0,0,0,0.03) 0 1px, transparent 1px 6px),
+        repeating-linear-gradient(-45deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 7px);
+      mix-blend-mode: multiply;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      position: relative;
+      z-index: 1;
+      padding: 16px 18px;
+      border-bottom: 2px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.25));
+    }
+
+    header .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header .seal {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 2px solid #7e1f15;
+      color: #7e1f15;
+      display: grid;
+      place-items: center;
+      font-family: "Yuji Syuku", "Noto Serif JP", serif;
+      font-size: 16px;
+      letter-spacing: 2px;
+      background: #f6d9d5;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+      transform: rotate(-2deg);
+    }
+
+    #title {
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .meta {
+      color: var(--ink-soft);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    #net {
+      height: calc(100vh - 110px);
+      position: relative;
+      z-index: 1;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          rgba(248,241,227,0.45) 0px,
+          rgba(248,241,227,0.45) 120px,
+          rgba(255,255,255,0) 120px,
+          rgba(255,255,255,0) 150px
+        );
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--ink-soft);
+      align-items: center;
+    }
+    .btn {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff7ea;
+      color: var(--ink-soft);
+      cursor: pointer;
+    }
+    .controls label {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      cursor: pointer;
+    }
+    .legend {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot.mother { background: #b13a2a; }
+    .dot.father { background: #2f5c8f; }
+
+    a { color: inherit; }
+
+    @media (max-width: 720px) {
+      header {
+        padding: 14px 14px;
+      }
+      #title { font-size: 18px; }
+      #net { height: calc(100vh - 120px); }
+    }
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Yuji+Syuku&display=swap" rel="stylesheet">
+
+  <!-- vis-network (CDN) -->
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="title-wrap">
+      <div class="seal">系図</div>
+      <div><strong id="title">家系図</strong></div>
+    </div>
+    <div class="meta"><a id="backLink" href="./zoo.html?zooId=higashiyama-zoo">← 一覧へ戻る</a></div>
+    <div class="meta">クリック/ドラッグで移動、ホイールで拡大</div>
+    <div class="controls">
+      <label><input id="toggleSex" type="checkbox" checked> 性別</label>
+      <label><input id="toggleBirth" type="checkbox" checked> 誕生日</label>
+      <span class="legend"><span class="dot mother"></span>母系</span>
+      <span class="legend"><span class="dot father"></span>父系</span>
+      <button id="centerRoot" class="btn" type="button">中心へ</button>
+      <button id="fitAll" class="btn" type="button">全体表示</button>
+    </div>
+  </header>
+
+  <div id="net"></div>
+
+  <script>
+    const API_BASE = "/api";
+
+    const params = new URLSearchParams(location.search);
+    const koalaId = params.get("koalaId") || "monaka";
+    const depth = params.get("depth") || "2";
+    const includeChildren = params.get("includeChildren") || "1";
+
+    document.getElementById("title").textContent = `家系図: ${koalaId} (depth=${depth})`;
+
+    main().catch(err => {
+      console.error(err);
+      alert("家系図の読み込みに失敗しました: " + err.message);
+    });
+
+    async function main() {
+      const res = await fetch(`${API_BASE}/koalas/${encodeURIComponent(koalaId)}/pedigree?depth=${encodeURIComponent(depth)}&includeChildren=${encodeURIComponent(includeChildren)}`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const data = await res.json();
+
+      const rootId = data.rootId;
+      const rawNodes = data.nodes.map(n => ({
+        id: n.id,
+        name: n.name || "（不明）",
+        sex: n.sex || "U",
+        birthDate: n.birthDate || ""
+      }));
+
+      const nodes = rawNodes.map(n => ({
+        id: n.id,
+        label: formatLabel(n),
+        shape: "circularImage",
+        image: placeholderPhoto(n.name || "Koala"),
+        size: n.id === rootId ? 36 : 30,
+        borderWidth: n.id === rootId ? 3 : 2,
+        color: n.id === rootId
+          ? { background: "#fff7e6", border: "#8b2a1b", highlight: { background: "#fff7e6", border: "#8b2a1b" }, hover: { background: "#fff7e6", border: "#8b2a1b" } }
+          : undefined,
+        margin: { top: 12, right: 16, bottom: 12, left: 16 },
+      }));
+
+      // edges (parent -> child)
+      const edges = data.edges.map(e => ({
+        from: e.from,
+        to: e.to,
+        arrows: "to",
+        color: e.type === "mother"
+          ? { color: "#b13a2a", highlight: "#b13a2a", hover: "#b13a2a" }
+          : { color: "#2f5c8f", highlight: "#2f5c8f", hover: "#2f5c8f" }
+      }));
+
+      const container = document.getElementById("net");
+      const toggleSex = document.getElementById("toggleSex");
+      const toggleBirth = document.getElementById("toggleBirth");
+      const centerRootBtn = document.getElementById("centerRoot");
+      const fitAllBtn = document.getElementById("fitAll");
+      const networkData = {
+        nodes: new vis.DataSet(nodes),
+        edges: new vis.DataSet(edges),
+      };
+
+      // それっぽい家系図：上に祖父母→親→子 の階層に寄せる
+      // 「親→子」方向を下向きにする
+      const options = {
+        physics: false,
+        layout: {
+          hierarchical: {
+            enabled: true,
+            direction: "UD",     // Up->Down
+            sortMethod: "directed",
+            levelSeparation: 140,
+            nodeSpacing: 190
+          }
+        },
+        nodes: {
+          shape: "circularImage",
+          borderWidth: 2,
+          color: {
+            background: "#f8f1e3",
+            border: "#b19a7d",
+            highlight: { background: "#fff7e6", border: "#8b2a1b" },
+            hover: { background: "#fff7e6", border: "#8b2a1b" }
+          },
+          size: 30,
+          font: {
+            color: "#1c1a16",
+            face: "Shippori Mincho, Noto Serif JP, Yu Mincho, serif",
+            size: 15,
+            align: "center",
+            multi: "markdown"
+          },
+          shadow: {
+            enabled: true,
+            color: "rgba(0,0,0,0.15)",
+            size: 8,
+            x: 2,
+            y: 2
+          }
+        },
+        edges: {
+          width: 2,
+          smooth: { type: "cubicBezier", forceDirection: "vertical", roundness: 0.4 },
+          font: {
+            align: "middle",
+            face: "Shippori Mincho, Noto Serif JP, Yu Mincho, serif",
+            size: 12,
+            color: "#4a4036",
+            strokeWidth: 0
+          }
+        }
+      };
+
+      const network = new vis.Network(container, networkData, options);
+
+      function updateLabels() {
+        const next = rawNodes.map(n => ({
+          id: n.id,
+          label: formatLabel(n)
+        }));
+        networkData.nodes.update(next);
+      }
+
+      toggleSex.addEventListener("change", updateLabels);
+      toggleBirth.addEventListener("change", updateLabels);
+      centerRootBtn.addEventListener("click", () => {
+        if (rootId) network.focus(rootId, { scale: 1.1, animation: true });
+      });
+      fitAllBtn.addEventListener("click", () => network.fit({ animation: true }));
+      updateLabels();
+    }
+
+    function placeholderPhoto(label) {
+      const text = (label || "Koala").slice(0, 6);
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240">
+          <defs>
+            <radialGradient id="g" cx="50%" cy="35%" r="70%">
+              <stop offset="0" stop-color="#fff7ea"/>
+              <stop offset="1" stop-color="#e6d6c1"/>
+            </radialGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#g)"/>
+          <circle cx="70" cy="90" r="40" fill="#cdb89b"/>
+          <circle cx="170" cy="90" r="40" fill="#cdb89b"/>
+          <circle cx="120" cy="120" r="55" fill="#d9c6ad"/>
+          <circle cx="120" cy="140" r="18" fill="#b59c7b"/>
+          <circle cx="105" cy="112" r="6" fill="#4a4036"/>
+          <circle cx="135" cy="112" r="6" fill="#4a4036"/>
+          <text x="50%" y="210" text-anchor="middle" font-size="22" fill="#7a4b36" font-family="Shippori Mincho, Noto Serif JP, serif">${text}</text>
+        </svg>
+      `;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
+
+    function formatLabel(n) {
+      const showSex = document.getElementById("toggleSex")?.checked ?? true;
+      const showBirth = document.getElementById("toggleBirth")?.checked ?? true;
+      const lines = [n.name];
+      if (showSex) lines.push(n.sex || "U");
+      if (showBirth && n.birthDate) lines.push(n.birthDate);
+      return lines.join("\n").trim();
+    }
+  </script>
+</body>
+</html>

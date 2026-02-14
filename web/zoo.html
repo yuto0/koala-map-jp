@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zoo - Koala Map JP</title>
+  <style>
+    :root {
+      --ink: #1f1a16;
+      --ink-soft: #5a4f44;
+      --paper: #f5efe6;
+      --paper-deep: #ece2d3;
+      --frame: #d7c7b0;
+      --accent: #7a4b36;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 450px at 15% -10%, #fff7ea 0%, transparent 60%),
+        radial-gradient(900px 500px at 90% -20%, #fff2dc 0%, transparent 55%),
+        linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+    }
+
+    header {
+      padding: 14px 16px;
+      border-bottom: 2px solid var(--frame);
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(4px);
+    }
+
+    main { padding: 14px 16px 28px; }
+    .meta { color: var(--ink-soft); font-size:12px; margin-top:4px; }
+    .pill { font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid #d1c0a8; background:#fff7ea; color: var(--ink-soft); }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .toolbar input,
+    .toolbar select {
+      padding: 6px 10px;
+      border: 1px solid #d1c0a8;
+      border-radius: 999px;
+      background: #fff7ea;
+      color: var(--ink-soft);
+      font-size: 12px;
+    }
+    .btn {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1c0a8;
+      background: #fff7ea;
+      color: var(--ink-soft);
+      cursor: pointer;
+    }
+
+    .album {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .card {
+      background: #fffaf1;
+      border: 1px solid var(--frame);
+      border-radius: 12px;
+      padding: 10px 10px 12px;
+      box-shadow:
+        0 2px 0 rgba(0,0,0,0.08),
+        0 10px 20px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px) rotate(var(--tilt, 0deg));
+      box-shadow:
+        0 4px 0 rgba(0,0,0,0.08),
+        0 14px 26px rgba(0,0,0,0.12);
+    }
+
+    .photo {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      border-radius: 8px;
+      border: 1px solid #cdbda7;
+      background: #efe3d0;
+      display: block;
+      object-fit: cover;
+      filter: sepia(0.18) contrast(1.02) saturate(0.9);
+    }
+
+    .name {
+      margin-top: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .sub {
+      color: var(--ink-soft);
+      font-size: 12px;
+      margin-top: 2px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid #d1c0a8;
+      color: var(--ink-soft);
+      background: #fff7ea;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 16px;
+    }
+    .modal.open { display: flex; }
+    .modal-card {
+      width: min(520px, 92vw);
+      background: #fffaf1;
+      border: 1px solid var(--frame);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      padding: 14px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .close-btn {
+      border: 1px solid var(--frame);
+      background: #fff7ea;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--ink-soft);
+    }
+    .modal-body {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+      margin-top: 10px;
+      align-items: start;
+    }
+    .modal-photo {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      border-radius: 10px;
+      border: 1px solid #cdbda7;
+      object-fit: cover;
+      background: #efe3d0;
+      filter: sepia(0.18) contrast(1.02) saturate(0.9);
+    }
+    .modal-info {
+      font-size: 13px;
+      color: var(--ink-soft);
+      display: grid;
+      gap: 6px;
+    }
+    .modal-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .action {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1c0a8;
+      color: var(--ink-soft);
+      background: #fff7ea;
+      text-decoration: none;
+    }
+    .empty {
+      margin-top: 12px;
+      color: var(--ink-soft);
+      font-size: 12px;
+      text-align: center;
+      display: none;
+    }
+    .empty.show { display: block; }
+
+    a { color: inherit; }
+
+    @media (max-width: 720px) {
+      .album { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+    }
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div><strong id="zooTitle">動物園</strong></div>
+    <div class="meta">現存コアラ一覧（クリックで家系図へ）</div>
+    <div class="meta"><a href="./">← 地図へ戻る</a></div>
+  </header>
+
+  <main>
+    <div id="count" class="pill">読み込み中…</div>
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="名前で検索" />
+      <select id="sexFilter">
+        <option value="">性別: すべて</option>
+        <option value="M">性別: オス</option>
+        <option value="F">性別: メス</option>
+        <option value="U">性別: 不明</option>
+      </select>
+      <button id="clearFilter" class="btn" type="button">クリア</button>
+    </div>
+    <div id="cards" class="album"></div>
+    <div id="empty" class="empty">該当するコアラがいません</div>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <div id="modalTitle" class="modal-title">コアラ詳細</div>
+        <button id="modalClose" class="close-btn" type="button">閉じる</button>
+      </div>
+      <div class="modal-body">
+        <img id="modalPhoto" class="modal-photo" alt="">
+        <div class="modal-info">
+          <div id="modalName"></div>
+          <div id="modalSex"></div>
+          <div id="modalBirth"></div>
+          <div id="modalStatus"></div>
+          <div id="modalParents"></div>
+          <div id="modalZoo"></div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <a id="modalPedigree" class="action" href="#">家系図へ →</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "/api";
+
+    const params = new URLSearchParams(location.search);
+    const zooId = params.get("zooId") || "higashiyama-zoo"; // デフォルトで東山
+
+    document.getElementById("zooTitle").textContent = `Zoo: ${zooId}`;
+
+    main().catch(err => {
+      console.error(err);
+      alert("読み込みに失敗しました: " + err.message);
+    });
+
+    async function main() {
+      const res = await fetch(`${API_BASE}/zoos/${encodeURIComponent(zooId)}/koalas?status=alive`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const koalas = await res.json();
+
+      const countEl = document.getElementById("count");
+      const cardsEl = document.getElementById("cards");
+      const emptyEl = document.getElementById("empty");
+      const qInput = document.getElementById("q");
+      const sexFilter = document.getElementById("sexFilter");
+      const clearFilterBtn = document.getElementById("clearFilter");
+      const modalEl = document.getElementById("modal");
+      const modalClose = document.getElementById("modalClose");
+
+      const allKoalas = Array.isArray(koalas) ? koalas : [];
+      const koalaById = new Map(allKoalas.map(k => [k.id, k]));
+
+      function render(list) {
+        cardsEl.innerHTML = "";
+        for (const k of list) {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.style.setProperty("--tilt", `${randomTilt()}deg`);
+
+          const sex = k.sex || "U";
+          const bd  = k.birthDate || "";
+          const name = k.name || "(no name)";
+          const photoUrl = getPhotoUrl(k);
+
+          card.innerHTML = `
+            <img class="photo" src="${photoUrl}" alt="${escapeHtml(name)}">
+            <div class="name">${escapeHtml(name)}</div>
+            <div class="sub">
+              <span class="tag">${escapeHtml(sex)}</span>
+              <span>${escapeHtml(bd)}</span>
+            </div>
+          `;
+
+          const photoEl = card.querySelector(".photo");
+          photoEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openModal(k, zooId, modalEl, koalaById);
+          });
+
+          card.addEventListener("click", () => {
+            location.href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1`;
+          });
+
+          cardsEl.appendChild(card);
+        }
+        emptyEl.classList.toggle("show", list.length === 0);
+      }
+
+      function applyFilters() {
+        const q = (qInput.value || "").trim().toLowerCase();
+        const sex = sexFilter.value;
+        const filtered = allKoalas.filter(k => {
+          const name = (k.name || "").toLowerCase();
+          const okName = q === "" ? true : name.includes(q);
+          const okSex = sex === "" ? true : (k.sex || "U") === sex;
+          return okName && okSex;
+        });
+        countEl.textContent = `${filtered.length} 頭`;
+        render(filtered);
+      }
+
+      qInput.addEventListener("input", applyFilters);
+      sexFilter.addEventListener("change", applyFilters);
+      clearFilterBtn.addEventListener("click", () => {
+        qInput.value = "";
+        sexFilter.value = "";
+        applyFilters();
+        qInput.focus();
+      });
+
+      countEl.textContent = `${allKoalas.length} 頭`;
+      render(allKoalas);
+
+      modalClose.addEventListener("click", () => closeModal(modalEl));
+      modalEl.addEventListener("click", (e) => {
+        if (e.target === modalEl) closeModal(modalEl);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal(modalEl);
+      });
+    }
+
+    function openModal(k, zooId, modalEl, koalaById) {
+      document.getElementById("modalTitle").textContent = "コアラ詳細";
+      document.getElementById("modalPhoto").src = getPhotoUrl(k);
+      document.getElementById("modalPhoto").alt = k.name || "(no name)";
+      document.getElementById("modalName").textContent = `名前: ${k.name || "(no name)"}`;
+      document.getElementById("modalSex").textContent = `性別: ${k.sex || "U"}`;
+      document.getElementById("modalBirth").textContent = `誕生日: ${k.birthDate || "-"}`;
+      document.getElementById("modalStatus").textContent = `状態: ${k.status || "-"}`;
+      const motherHtml = renderParentLink(k.motherId, koalaById);
+      const fatherHtml = renderParentLink(k.fatherId, koalaById);
+      document.getElementById("modalParents").innerHTML = `両親: ${motherHtml} / ${fatherHtml}`;
+      document.getElementById("modalZoo").textContent = `動物園: ${zooId}`;
+      document.getElementById("modalPedigree").href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1`;
+      modalEl.classList.add("open");
+      modalEl.setAttribute("aria-hidden", "false");
+    }
+
+    function renderParentLink(id, koalaById) {
+      if (!id) return "-";
+      const parent = koalaById.get(id);
+      const label = parent?.name || id;
+      const href = `./pedigree.html?koalaId=${encodeURIComponent(id)}&depth=2&includeChildren=1`;
+      return `<a class="action" href="${escapeAttr(href)}">${escapeHtml(label)}</a>`;
+    }
+
+    function closeModal(modalEl) {
+      modalEl.classList.remove("open");
+      modalEl.setAttribute("aria-hidden", "true");
+    }
+
+    function getPhotoUrl(k) {
+      if (k.photoUrl) return k.photoUrl;
+      if (k.imageUrl) return k.imageUrl;
+      return placeholderPhoto(k.name || "Koala");
+    }
+
+    function placeholderPhoto(name) {
+      const text = (name || "Koala").slice(0, 6);
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="400" height="500">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f7efe0"/>
+              <stop offset="1" stop-color="#e6d6c1"/>
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#g)"/>
+          <circle cx="120" cy="160" r="70" fill="#cdb89b"/>
+          <circle cx="280" cy="160" r="70" fill="#cdb89b"/>
+          <circle cx="200" cy="230" r="90" fill="#d9c6ad"/>
+          <circle cx="200" cy="260" r="30" fill="#b59c7b"/>
+          <circle cx="170" cy="215" r="10" fill="#4a4036"/>
+          <circle cx="230" cy="215" r="10" fill="#4a4036"/>
+          <text x="50%" y="430" text-anchor="middle" font-size="32" fill="#7a4b36" font-family="Shippori Mincho, Noto Serif JP, serif">${text}</text>
+        </svg>
+      `;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
+
+    function randomTilt() {
+      return (Math.random() * 3 - 1.5).toFixed(2);
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[s]));
+    }
+
+    function escapeAttr(str) {
+      return String(str).replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
