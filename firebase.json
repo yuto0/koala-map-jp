@@ -11,11 +11,20 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "koala-map-jp-api",
+          "region": "asia-northeast1"
+        }
+      }
     ]
   },
   "emulators": {
     "firestore": {
-      "port": 8080
+      "port": 8081
     },
     "ui": {
       "enabled": true
