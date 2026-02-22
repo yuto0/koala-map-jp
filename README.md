@@ -79,3 +79,35 @@ PROJECT_ID=koala-map-jp REGION=asia-northeast1 API_SERVICE=koala-map-jp-api ./in
 ```bash
 curl -i https://koala-map-jp.web.app/api/health
 ```
+
+## Docker 擬似本番環境（Hosting + API + Firestore）
+この構成は `web(nginx)` -> `/api` プロキシ -> `Go API` -> `Firestore Emulator` です。
+Firestore Emulator コンテナは `Java 21` を利用します。
+
+起動:
+```bash
+docker compose up --build -d firestore api web
+```
+
+Seed投入:
+```bash
+docker compose run --rm seed
+```
+
+アクセス先:
+- 画面: `http://localhost:8088`
+- APIヘルス: `http://localhost:8088/api/health`
+- Firestore Emulator UI: `http://localhost:4000`
+
+停止:
+```bash
+docker compose down
+```
+
+停止時に Firestore データは `.emulator-data/` へエクスポートされ、次回起動時に復元されます。
+
+Firestore コンテナ設定を変更したときは再ビルドしてください:
+```bash
+docker compose build firestore
+docker compose up -d firestore
+```
