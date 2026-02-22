@@ -4,243 +4,375 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Zoo - Koala Map JP</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore-compat.js"></script>
+  <script src="./firebase-config.js"></script>
+
   <style>
     :root {
-      --ink: #1f1a16;
-      --ink-soft: #5a4f44;
-      --paper: #f5efe6;
-      --paper-deep: #ece2d3;
-      --frame: #d7c7b0;
-      --accent: #7a4b36;
+      --ink: #22201c;
+      --ink-soft: #61594e;
+      --paper: #f8f4ec;
+      --paper-deep: #f0e7d8;
+      --line: #d5c8b6;
+      --accent: #8b4d2b;
+      --accent-soft: #f6e6d7;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(900px 450px at 15% -10%, #fff7ea 0%, transparent 60%),
-        radial-gradient(900px 500px at 90% -20%, #fff2dc 0%, transparent 55%),
+        radial-gradient(1200px 520px at 10% -10%, #fff8ea 0%, transparent 62%),
+        radial-gradient(900px 540px at 88% -20%, #fef2e2 0%, transparent 55%),
         linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
     }
 
     header {
-      padding: 14px 16px;
-      border-bottom: 2px solid var(--frame);
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(4px);
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.62);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    main { padding: 14px 16px 28px; }
-    .meta { color: var(--ink-soft); font-size:12px; margin-top:4px; }
-    .pill { font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid #d1c0a8; background:#fff7ea; color: var(--ink-soft); }
-    .toolbar {
+    .title {
+      font-family: "Shippori Mincho", serif;
+      font-size: clamp(22px, 3vw, 30px);
+      letter-spacing: 0.6px;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .meta {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .stats {
+      margin-top: 10px;
       display: flex;
       gap: 8px;
-      align-items: center;
       flex-wrap: wrap;
-      margin-top: 10px;
     }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: var(--ink-soft);
+      background: rgba(255,255,255,0.75);
+      font-weight: 600;
+    }
+
+    main {
+      padding: 14px 16px 28px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .toolbar {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.68);
+      padding: 10px;
+    }
+
+    .toolbar-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
     .toolbar input,
-    .toolbar select {
-      padding: 6px 10px;
-      border: 1px solid #d1c0a8;
-      border-radius: 999px;
-      background: #fff7ea;
-      color: var(--ink-soft);
-      font-size: 12px;
-    }
+    .toolbar select,
     .btn {
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid #d1c0a8;
-      background: #fff7ea;
-      color: var(--ink-soft);
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #fffdf9;
+      color: var(--ink);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .btn {
       cursor: pointer;
+      font-weight: 700;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(87, 52, 29, 0.14);
+    }
+
+    .count {
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 600;
     }
 
     .album {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
       gap: 14px;
-      margin-top: 12px;
+      margin-top: 14px;
     }
 
     .card {
-      background: #fffaf1;
-      border: 1px solid var(--frame);
-      border-radius: 12px;
-      padding: 10px 10px 12px;
-      box-shadow:
-        0 2px 0 rgba(0,0,0,0.08),
-        0 10px 20px rgba(0,0,0,0.08);
+      background: #fffefb;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 10px 24px rgba(82, 52, 28, 0.10);
       cursor: pointer;
-      transform: rotate(var(--tilt, 0deg));
-      transition: transform 120ms ease, box-shadow 120ms ease;
+      transform: translateY(6px);
+      opacity: 0;
+      animation: card-in 220ms ease forwards;
+    }
+
+    @keyframes card-in {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     .card:hover {
-      transform: translateY(-2px) rotate(var(--tilt, 0deg));
-      box-shadow:
-        0 4px 0 rgba(0,0,0,0.08),
-        0 14px 26px rgba(0,0,0,0.12);
+      border-color: #b89c7d;
+    }
+
+    .photo-wrap {
+      position: relative;
     }
 
     .photo {
       width: 100%;
       aspect-ratio: 4 / 5;
-      border-radius: 8px;
-      border: 1px solid #cdbda7;
+      border-radius: 10px;
+      border: 1px solid #d6c7b5;
       background: #efe3d0;
       display: block;
       object-fit: cover;
-      filter: sepia(0.18) contrast(1.02) saturate(0.9);
+      filter: sepia(0.14) saturate(0.94);
+    }
+
+    .sex-pill {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid #dbcab6;
+      background: rgba(255,255,255,0.85);
+      color: var(--ink-soft);
+      font-weight: 700;
     }
 
     .name {
       margin-top: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      font-family: "Shippori Mincho", serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
     }
 
     .sub {
       color: var(--ink-soft);
       font-size: 12px;
-      margin-top: 2px;
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      flex-wrap: wrap;
+      margin-top: 3px;
+      display: grid;
+      gap: 3px;
     }
 
-    .tag {
+    .status {
+      margin-top: 8px;
       font-size: 11px;
-      padding: 2px 6px;
+      padding: 3px 8px;
       border-radius: 999px;
-      border: 1px solid #d1c0a8;
-      color: var(--ink-soft);
-      background: #fff7ea;
+      border: 1px solid #e3d4c3;
+      background: #fff7ee;
+      color: #73563f;
+      display: inline-block;
     }
 
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-      padding: 16px;
-    }
-    .modal.open { display: flex; }
-    .modal-card {
-      width: min(520px, 92vw);
-      background: #fffaf1;
-      border: 1px solid var(--frame);
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-      padding: 14px;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .close-btn {
-      border: 1px solid var(--frame);
-      background: #fff7ea;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      color: var(--ink-soft);
-    }
-    .modal-body {
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 12px;
-      margin-top: 10px;
-      align-items: start;
-    }
-    .modal-photo {
-      width: 100%;
-      aspect-ratio: 4 / 5;
-      border-radius: 10px;
-      border: 1px solid #cdbda7;
-      object-fit: cover;
-      background: #efe3d0;
-      filter: sepia(0.18) contrast(1.02) saturate(0.9);
-    }
-    .modal-info {
-      font-size: 13px;
-      color: var(--ink-soft);
-      display: grid;
-      gap: 6px;
-    }
-    .modal-actions {
-      margin-top: 12px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .action {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid #d1c0a8;
-      color: var(--ink-soft);
-      background: #fff7ea;
-      text-decoration: none;
-    }
     .empty {
       margin-top: 12px;
       color: var(--ink-soft);
       font-size: 12px;
       text-align: center;
       display: none;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(255,255,255,0.62);
     }
     .empty.show { display: block; }
 
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.42);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      padding: 16px;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(560px, 95vw);
+      background: #fffdf8;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 24px 46px rgba(0,0,0,0.24);
+      padding: 14px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-title {
+      font-family: "Shippori Mincho", serif;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      border: 1px solid var(--line);
+      background: #fff6ea;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--ink-soft);
+      font-family: inherit;
+    }
+
+    .modal-body {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 12px;
+      margin-top: 10px;
+      align-items: start;
+    }
+
+    .modal-photo {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      border-radius: 10px;
+      border: 1px solid #d6c7b5;
+      object-fit: cover;
+      background: #efe3d0;
+    }
+
+    .modal-info {
+      font-size: 13px;
+      color: var(--ink-soft);
+      display: grid;
+      gap: 7px;
+      line-height: 1.45;
+    }
+
+    .modal-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #d7c7b3;
+      color: var(--ink-soft);
+      background: #fff6ea;
+      text-decoration: none;
+    }
+
     a { color: inherit; }
 
-    @media (max-width: 720px) {
-      .album { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+    @media (max-width: 900px) {
+      .toolbar-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header { padding: 12px; }
+      main { padding: 12px 12px 24px; }
+      .toolbar-row { grid-template-columns: 1fr; }
+      .album { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+      .modal-body { grid-template-columns: 1fr; }
+      .modal-photo { max-width: 220px; }
     }
   </style>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
-    <div><strong id="zooTitle">動物園</strong></div>
-    <div class="meta">現存コアラ一覧（クリックで家系図へ）</div>
+    <h1 id="zooTitle" class="title">動物園</h1>
+    <div class="meta" id="zooMeta">現存コアラ一覧（写真クリックで詳細 / カードクリックで家系図）</div>
     <div class="meta"><a href="./">← 地図へ戻る</a></div>
+    <div class="stats">
+      <span id="statAlive" class="stat">現存: -</span>
+      <span id="statFemale" class="stat">メス: -</span>
+      <span id="statMale" class="stat">オス: -</span>
+      <span id="statUnknown" class="stat">不明: -</span>
+    </div>
   </header>
 
   <main>
-    <div id="count" class="pill">読み込み中…</div>
     <div class="toolbar">
-      <input id="q" type="search" placeholder="名前で検索" />
-      <select id="sexFilter">
-        <option value="">性別: すべて</option>
-        <option value="M">性別: オス</option>
-        <option value="F">性別: メス</option>
-        <option value="U">性別: 不明</option>
-      </select>
-      <button id="clearFilter" class="btn" type="button">クリア</button>
+      <div class="toolbar-row">
+        <input id="q" type="search" placeholder="名前で検索" />
+        <select id="sexFilter">
+          <option value="">性別: すべて</option>
+          <option value="M">性別: オス</option>
+          <option value="F">性別: メス</option>
+          <option value="U">性別: 不明</option>
+        </select>
+        <select id="statusFilter">
+          <option value="alive">状態: 現存</option>
+          <option value="">状態: すべて</option>
+          <option value="deceased">状態: 死亡</option>
+          <option value="unknown">状態: 不明</option>
+        </select>
+        <select id="sortOrder">
+          <option value="name">並び順: 名前（あいうえお）</option>
+          <option value="birth_desc">並び順: 生年（新しい順）</option>
+          <option value="birth_asc">並び順: 生年（古い順）</option>
+        </select>
+      </div>
+      <div class="toolbar-row">
+        <button id="clearFilter" class="btn" type="button">条件クリア</button>
+        <div id="count" class="count">読み込み中…</div>
+      </div>
     </div>
+
     <div id="cards" class="album"></div>
     <div id="empty" class="empty">該当するコアラがいません</div>
   </main>
@@ -270,11 +402,10 @@
 
   <script>
     const API_BASE = "/api";
+    const db = initFirestore();
 
     const params = new URLSearchParams(location.search);
-    const zooId = params.get("zooId") || "higashiyama-zoo"; // デフォルトで東山
-
-    document.getElementById("zooTitle").textContent = `Zoo: ${zooId}`;
+    const zooId = params.get("zooId") || "higashiyama-zoo";
 
     main().catch(err => {
       console.error(err);
@@ -282,15 +413,22 @@
     });
 
     async function main() {
-      const res = await fetch(`${API_BASE}/zoos/${encodeURIComponent(zooId)}/koalas?status=alive`);
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
-      const koalas = await res.json();
+      const [koalas, zoo] = await Promise.all([
+        getKoalasByZoo(zooId),
+        getZoo(zooId)
+      ]);
+
+      const titleText = zoo?.name || `Zoo: ${zooId}`;
+      document.getElementById("zooTitle").textContent = titleText;
+      document.getElementById("zooMeta").textContent = zoo?.pref || zoo?.city ? `${zoo.pref || ""} ${zoo.city || ""} の個体一覧` : "現存コアラ一覧（写真クリックで詳細 / カードクリックで家系図）";
 
       const countEl = document.getElementById("count");
       const cardsEl = document.getElementById("cards");
       const emptyEl = document.getElementById("empty");
       const qInput = document.getElementById("q");
       const sexFilter = document.getElementById("sexFilter");
+      const statusFilter = document.getElementById("statusFilter");
+      const sortOrder = document.getElementById("sortOrder");
       const clearFilterBtn = document.getElementById("clearFilter");
       const modalEl = document.getElementById("modal");
       const modalClose = document.getElementById("modalClose");
@@ -298,31 +436,38 @@
       const allKoalas = Array.isArray(koalas) ? koalas : [];
       const koalaById = new Map(allKoalas.map(k => [k.id, k]));
 
+      updateStats(allKoalas);
+
       function render(list) {
         cardsEl.innerHTML = "";
-        for (const k of list) {
+        for (let i = 0; i < list.length; i++) {
+          const k = list[i];
           const card = document.createElement("div");
           card.className = "card";
-          card.style.setProperty("--tilt", `${randomTilt()}deg`);
+          card.style.animationDelay = `${Math.min(i * 18, 180)}ms`;
 
           const sex = k.sex || "U";
-          const bd  = k.birthDate || "";
+          const bd = k.birthDate || "-";
           const name = k.name || "(no name)";
           const photoUrl = getPhotoUrl(k);
 
           card.innerHTML = `
-            <img class="photo" src="${photoUrl}" alt="${escapeHtml(name)}">
+            <div class="photo-wrap">
+              <img class="photo" src="${photoUrl}" alt="${escapeHtml(name)}">
+              <span class="sex-pill">${escapeHtml(sex)}</span>
+            </div>
             <div class="name">${escapeHtml(name)}</div>
             <div class="sub">
-              <span class="tag">${escapeHtml(sex)}</span>
-              <span>${escapeHtml(bd)}</span>
+              <div>誕生日: ${escapeHtml(bd)}</div>
+              <div>ID: ${escapeHtml(k.id || "-")}</div>
             </div>
+            <div class="status">状態: ${escapeHtml(k.status || "unknown")}</div>
           `;
 
           const photoEl = card.querySelector(".photo");
           photoEl.addEventListener("click", (e) => {
             e.stopPropagation();
-            openModal(k, zooId, modalEl, koalaById);
+            openModal(k, titleText, modalEl, koalaById);
           });
 
           card.addEventListener("click", () => {
@@ -337,27 +482,38 @@
       function applyFilters() {
         const q = (qInput.value || "").trim().toLowerCase();
         const sex = sexFilter.value;
+        const status = statusFilter.value;
+        const sort = sortOrder.value;
+
         const filtered = allKoalas.filter(k => {
           const name = (k.name || "").toLowerCase();
           const okName = q === "" ? true : name.includes(q);
           const okSex = sex === "" ? true : (k.sex || "U") === sex;
-          return okName && okSex;
+          const okStatus = status === "" ? true : (k.status || "") === status;
+          return okName && okSex && okStatus;
         });
-        countEl.textContent = `${filtered.length} 頭`;
-        render(filtered);
+
+        const sorted = [...filtered].sort((a, b) => compareKoalas(a, b, sort));
+
+        countEl.textContent = `${sorted.length} 頭表示`;
+        render(sorted);
       }
 
       qInput.addEventListener("input", applyFilters);
       sexFilter.addEventListener("change", applyFilters);
+      statusFilter.addEventListener("change", applyFilters);
+      sortOrder.addEventListener("change", applyFilters);
       clearFilterBtn.addEventListener("click", () => {
         qInput.value = "";
         sexFilter.value = "";
+        statusFilter.value = "alive";
+        sortOrder.value = "name";
         applyFilters();
         qInput.focus();
       });
 
       countEl.textContent = `${allKoalas.length} 頭`;
-      render(allKoalas);
+      applyFilters();
 
       modalClose.addEventListener("click", () => closeModal(modalEl));
       modalEl.addEventListener("click", (e) => {
@@ -368,8 +524,93 @@
       });
     }
 
-    function openModal(k, zooId, modalEl, koalaById) {
-      document.getElementById("modalTitle").textContent = "コアラ詳細";
+    async function getZoo(zooId) {
+      if (db) {
+        const doc = await db.collection("zoos").doc(zooId).get();
+        if (!doc.exists) return null;
+        return toZooFromDoc(doc);
+      }
+      const res = await fetch(`${API_BASE}/zoos`);
+      if (!res.ok) return null;
+      const list = await res.json();
+      if (!Array.isArray(list)) return null;
+      return list.find(z => z.id === zooId) || null;
+    }
+
+    async function getKoalasByZoo(zooId) {
+      if (db) {
+        const snap = await db.collection("koalas").where("currentZooId", "==", zooId).get();
+        return snap.docs.map(toKoalaFromDoc);
+      }
+      const res = await fetch(`${API_BASE}/zoos/${encodeURIComponent(zooId)}/koalas`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      return res.json();
+    }
+
+    function toZooFromDoc(doc) {
+      const m = doc.data() || {};
+      return {
+        id: doc.id,
+        name: asString(m.name),
+        pref: asString(m.pref),
+        city: asString(m.city),
+      };
+    }
+
+    function toKoalaFromDoc(doc) {
+      const m = doc.data() || {};
+      return {
+        id: doc.id,
+        name: asString(m.name),
+        sex: asString(m.sex),
+        birthDate: asString(m.birthDate),
+        status: asString(m.status),
+        currentZooId: asString(m.currentZooId),
+        motherId: asString(m.motherId),
+        fatherId: asString(m.fatherId),
+        photoUrl: asString(m.photoUrl),
+      };
+    }
+
+    function compareKoalas(a, b, sort) {
+      if (sort === "birth_desc") return scoreBirth(b.birthDate) - scoreBirth(a.birthDate) || (a.name || "").localeCompare(b.name || "", "ja");
+      if (sort === "birth_asc") return scoreBirth(a.birthDate) - scoreBirth(b.birthDate) || (a.name || "").localeCompare(b.name || "", "ja");
+      return (a.name || "").localeCompare(b.name || "", "ja");
+    }
+
+    function scoreBirth(v) {
+      if (!v) return -Infinity;
+      const y = Number(String(v).slice(0, 4));
+      if (!Number.isFinite(y)) return -Infinity;
+      return y;
+    }
+
+    function updateStats(list) {
+      const alive = list.filter(k => (k.status || "") === "alive").length;
+      const female = list.filter(k => (k.sex || "U") === "F").length;
+      const male = list.filter(k => (k.sex || "U") === "M").length;
+      const unknown = list.filter(k => (k.sex || "U") === "U").length;
+
+      document.getElementById("statAlive").textContent = `現存: ${alive}`;
+      document.getElementById("statFemale").textContent = `メス: ${female}`;
+      document.getElementById("statMale").textContent = `オス: ${male}`;
+      document.getElementById("statUnknown").textContent = `不明: ${unknown}`;
+    }
+
+    function asString(v) {
+      return typeof v === "string" ? v : "";
+    }
+
+    function initFirestore() {
+      if (!window.firebase || !window.__FIREBASE_CONFIG__) return null;
+      const cfg = window.__FIREBASE_CONFIG__;
+      if (!cfg.apiKey || !cfg.projectId || !cfg.appId) return null;
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+      return firebase.firestore();
+    }
+
+    function openModal(k, zooName, modalEl, koalaById) {
+      document.getElementById("modalTitle").textContent = k.name || "コアラ詳細";
       document.getElementById("modalPhoto").src = getPhotoUrl(k);
       document.getElementById("modalPhoto").alt = k.name || "(no name)";
       document.getElementById("modalName").textContent = `名前: ${k.name || "(no name)"}`;
@@ -379,7 +620,7 @@
       const motherHtml = renderParentLink(k.motherId, koalaById);
       const fatherHtml = renderParentLink(k.fatherId, koalaById);
       document.getElementById("modalParents").innerHTML = `両親: ${motherHtml} / ${fatherHtml}`;
-      document.getElementById("modalZoo").textContent = `動物園: ${zooId}`;
+      document.getElementById("modalZoo").textContent = `動物園: ${zooName}`;
       document.getElementById("modalPedigree").href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1`;
       modalEl.classList.add("open");
       modalEl.setAttribute("aria-hidden", "false");
@@ -425,10 +666,6 @@
         </svg>
       `;
       return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-    }
-
-    function randomTilt() {
-      return (Math.random() * 3 - 1.5).toFixed(2);
     }
 
     function escapeHtml(str) {

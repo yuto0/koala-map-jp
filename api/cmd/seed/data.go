@@ -174,22 +174,28 @@ func buildZoos(today string) []ZooSeed {
 func buildKoalas(today string) []KoalaSeed {
 	return []KoalaSeed{
 		// =========================
-		// Higashiyama（既存互換）
+		// Higashiyama（公式お知らせベースで更新）
 		// =========================
-		{ID: "monaka", Name: "もなか", Sex: "M", BirthDate: "2024-08-??", Status: "alive", CurrentZooID: "higashiyama-zoo", MotherID: "rin", FatherID: "ishin",
-			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/")}},
+		{ID: "monaka", Name: "もなか", Sex: "M", BirthDate: "2024-??-??", Status: "alive", CurrentZooID: "higashiyama-zoo", MotherID: "rin", FatherID: "ishin",
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/blog/2025/03/post-5110.html")}},
 		{ID: "daifuku", Name: "だいふく", Sex: "M", BirthDate: "2022-03-14", Status: "alive", CurrentZooID: "higashiyama-zoo", MotherID: "rin", FatherID: "taichi",
-			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/")}},
-		{ID: "tsukushi", Name: "つくし", Sex: "F", BirthDate: "2020-??-??", Status: "alive", CurrentZooID: "higashiyama-zoo", MotherID: "rin", FatherID: "ishin",
-			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/")}},
-		{ID: "rin", Name: "りん", Sex: "F", BirthDate: "2017-??-??", Status: "unknown", CurrentZooID: "", MotherID: "tilly", FatherID: "",
-			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/")}},
-		{ID: "ishin", Name: "イシン", Sex: "M", BirthDate: "????-??-??", Status: "unknown", CurrentZooID: "", MotherID: "", FatherID: "",
-			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/")}},
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/blog/2025/03/post-5110.html")}},
+		{ID: "tsukushi", Name: "つくし", Sex: "F", BirthDate: "2020-??-??", Status: "unknown", CurrentZooID: "", MotherID: "rin", FatherID: "ishin",
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/news/2022/06/post-731.html")}},
+		{ID: "rin", Name: "りん", Sex: "F", BirthDate: "2017-??-??", Status: "alive", CurrentZooID: "higashiyama-zoo", MotherID: "tilly", FatherID: "",
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/blog/2025/03/post-5110.html")}},
+		{ID: "ishin", Name: "イシン", Sex: "M", BirthDate: "????-??-??", Status: "alive", CurrentZooID: "higashiyama-zoo", MotherID: "", FatherID: "",
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/blog/2025/03/post-5110.html")}},
 		{ID: "taichi", Name: "タイチ", Sex: "M", BirthDate: "????-??-??", Status: "unknown", CurrentZooID: "", MotherID: "", FatherID: "",
-			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/")}},
-		{ID: "tilly", Name: "ティリー", Sex: "F", BirthDate: "????-??-??", Status: "unknown", CurrentZooID: "", MotherID: "", FatherID: "",
-			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/")}},
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/news/2022/06/post-731.html")}},
+		{ID: "tilly", Name: "ティリー", Sex: "F", BirthDate: "2009-??-??", Status: "deceased", CurrentZooID: "", MotherID: "", FatherID: "",
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/news/2024/12/post-1207.html")}},
+		{ID: "sky", Name: "スカイ", Sex: "M", BirthDate: "2022-04-20", Status: "alive", CurrentZooID: "higashiyama-zoo", MotherID: "", FatherID: "",
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/news/2024/10/post-1182.html")}},
+		{ID: "holly", Name: "ホリー", Sex: "F", BirthDate: "????-??-??", Status: "unknown", CurrentZooID: "",
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/news/2025/12/post-1420.html")}},
+		{ID: "nanami", Name: "ななみ", Sex: "F", BirthDate: "2018-07-07", Status: "deceased", CurrentZooID: "", MotherID: "holly", FatherID: "",
+			Sources: []Source{src(today, "official", "https://www.higashiyama.city.nagoya.jp/news/2025/12/post-1420.html")}},
 
 		// =========================
 		// Hirakawa（公式一覧が強い）
