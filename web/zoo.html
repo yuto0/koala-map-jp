@@ -8,9 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore-compat.js"></script>
-  <script src="./firebase-config.js"></script>
 
   <style>
     :root {
@@ -335,7 +332,7 @@
 <body>
   <header>
     <h1 id="zooTitle" class="title">動物園</h1>
-    <div class="meta" id="zooMeta">現存コアラ一覧（写真クリックで詳細 / カードクリックで家系図）</div>
+    <div class="meta" id="zooMeta">コアラ一覧（写真クリックで詳細 / カードクリックで家系図）</div>
     <div class="meta"><a href="./">← 地図へ戻る</a></div>
     <div class="stats">
       <span id="statAlive" class="stat">現存: -</span>
@@ -356,8 +353,8 @@
           <option value="U">性別: 不明</option>
         </select>
         <select id="statusFilter">
-          <option value="alive">状態: 現存</option>
           <option value="">状態: すべて</option>
+          <option value="alive">状態: 現存</option>
           <option value="deceased">状態: 死亡</option>
           <option value="unknown">状態: 不明</option>
         </select>
@@ -402,7 +399,6 @@
 
   <script>
     const API_BASE = "/api";
-    const db = initFirestore();
 
     const params = new URLSearchParams(location.search);
     const zooId = params.get("zooId") || "higashiyama-zoo";
@@ -420,7 +416,7 @@
 
       const titleText = zoo?.name || `Zoo: ${zooId}`;
       document.getElementById("zooTitle").textContent = titleText;
-      document.getElementById("zooMeta").textContent = zoo?.pref || zoo?.city ? `${zoo.pref || ""} ${zoo.city || ""} の個体一覧` : "現存コアラ一覧（写真クリックで詳細 / カードクリックで家系図）";
+      document.getElementById("zooMeta").textContent = zoo?.pref || zoo?.city ? `${zoo.pref || ""} ${zoo.city || ""} の個体一覧` : "コアラ一覧（写真クリックで詳細 / カードクリックで家系図）";
 
       const countEl = document.getElementById("count");
       const cardsEl = document.getElementById("cards");
@@ -471,7 +467,7 @@
           });
 
           card.addEventListener("click", () => {
-            location.href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1`;
+            location.href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
           });
 
           cardsEl.appendChild(card);
@@ -506,7 +502,7 @@
       clearFilterBtn.addEventListener("click", () => {
         qInput.value = "";
         sexFilter.value = "";
-        statusFilter.value = "alive";
+        statusFilter.value = "";
         sortOrder.value = "name";
         applyFilters();
         qInput.focus();
@@ -525,11 +521,6 @@
     }
 
     async function getZoo(zooId) {
-      if (db) {
-        const doc = await db.collection("zoos").doc(zooId).get();
-        if (!doc.exists) return null;
-        return toZooFromDoc(doc);
-      }
       const res = await fetch(`${API_BASE}/zoos`);
       if (!res.ok) return null;
       const list = await res.json();
@@ -538,38 +529,9 @@
     }
 
     async function getKoalasByZoo(zooId) {
-      if (db) {
-        const snap = await db.collection("koalas").where("currentZooId", "==", zooId).get();
-        return snap.docs.map(toKoalaFromDoc);
-      }
       const res = await fetch(`${API_BASE}/zoos/${encodeURIComponent(zooId)}/koalas`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       return res.json();
-    }
-
-    function toZooFromDoc(doc) {
-      const m = doc.data() || {};
-      return {
-        id: doc.id,
-        name: asString(m.name),
-        pref: asString(m.pref),
-        city: asString(m.city),
-      };
-    }
-
-    function toKoalaFromDoc(doc) {
-      const m = doc.data() || {};
-      return {
-        id: doc.id,
-        name: asString(m.name),
-        sex: asString(m.sex),
-        birthDate: asString(m.birthDate),
-        status: asString(m.status),
-        currentZooId: asString(m.currentZooId),
-        motherId: asString(m.motherId),
-        fatherId: asString(m.fatherId),
-        photoUrl: asString(m.photoUrl),
-      };
     }
 
     function compareKoalas(a, b, sort) {
@@ -597,18 +559,6 @@
       document.getElementById("statUnknown").textContent = `不明: ${unknown}`;
     }
 
-    function asString(v) {
-      return typeof v === "string" ? v : "";
-    }
-
-    function initFirestore() {
-      if (!window.firebase || !window.__FIREBASE_CONFIG__) return null;
-      const cfg = window.__FIREBASE_CONFIG__;
-      if (!cfg.apiKey || !cfg.projectId || !cfg.appId) return null;
-      if (!firebase.apps.length) firebase.initializeApp(cfg);
-      return firebase.firestore();
-    }
-
     function openModal(k, zooName, modalEl, koalaById) {
       document.getElementById("modalTitle").textContent = k.name || "コアラ詳細";
       document.getElementById("modalPhoto").src = getPhotoUrl(k);
@@ -621,7 +571,7 @@
       const fatherHtml = renderParentLink(k.fatherId, koalaById);
       document.getElementById("modalParents").innerHTML = `両親: ${motherHtml} / ${fatherHtml}`;
       document.getElementById("modalZoo").textContent = `動物園: ${zooName}`;
-      document.getElementById("modalPedigree").href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1`;
+      document.getElementById("modalPedigree").href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
       modalEl.classList.add("open");
       modalEl.setAttribute("aria-hidden", "false");
     }
@@ -630,7 +580,7 @@
       if (!id) return "-";
       const parent = koalaById.get(id);
       const label = parent?.name || id;
-      const href = `./pedigree.html?koalaId=${encodeURIComponent(id)}&depth=2&includeChildren=1`;
+      const href = `./pedigree.html?koalaId=${encodeURIComponent(id)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
       return `<a class="action" href="${escapeAttr(href)}">${escapeHtml(label)}</a>`;
     }
 

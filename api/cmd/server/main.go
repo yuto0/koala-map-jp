@@ -13,6 +13,8 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/go-chi/chi/v5"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Zoo struct {
@@ -95,9 +97,6 @@ func main() {
 	api.Get("/zoos/{zooId}/koalas", func(w http.ResponseWriter, r *http.Request) {
 		zooId := chi.URLParam(r, "zooId")
 		status := r.URL.Query().Get("status")
-		if status == "" {
-			status = "alive"
-		}
 
 		koalas, err := listKoalasByZoo(r.Context(), client, zooId, status)
 		if err != nil {
@@ -136,6 +135,14 @@ func main() {
 		}
 
 		resp, err := buildPedigree(r.Context(), client, koalaId, depth, includeChildren)
+		if err != nil {
+			httpError(w, err, http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, resp)
+	})
+	api.Get("/pedigree/all", func(w http.ResponseWriter, r *http.Request) {
+		resp, err := buildGlobalPedigree(r.Context(), client)
 		if err != nil {
 			httpError(w, err, http.StatusInternalServerError)
 			return
@@ -310,8 +317,7 @@ func buildPedigree(ctx context.Context, client *firestore.Client, rootID string,
 		ds, err := client.Collection("koalas").Doc(id).Get(ctx)
 		if err != nil {
 			// NotFound は「公開されてない/入ってない」扱いにする
-			// FirestoreのNotFound判定は環境差があるので、ここでは文字列でゆるく判定
-			if strings.Contains(strings.ToLower(err.Error()), "notfound") {
+			if isNotFoundErr(err) {
 				return nil, false, nil
 			}
 			return nil, false, err
@@ -440,6 +446,63 @@ func addChildrenOfRoot(ctx context.Context, client *firestore.Client, rootID str
 	return nil
 }
 
+func buildGlobalPedigree(ctx context.Context, client *firestore.Client) (PedigreeResponse, error) {
+	docs, err := client.Collection("koalas").Documents(ctx).GetAll()
+	if err != nil {
+		return PedigreeResponse{}, err
+	}
+
+	nodesByID := map[string]PedigreeNode{}
+	edges := make([]PedigreeEdge, 0, len(docs)*2)
+
+	for _, d := range docs {
+		m := d.Data()
+		id := d.Ref.ID
+		nodesByID[id] = PedigreeNode{
+			ID:        id,
+			Name:      asString(m["name"]),
+			Sex:       asString(m["sex"]),
+			BirthDate: asString(m["birthDate"]),
+		}
+	}
+
+	addParentEdge := func(parentID, childID, edgeType, unknownLabel string) {
+		if parentID == "" {
+			return
+		}
+		if _, ok := nodesByID[parentID]; !ok {
+			nodesByID[parentID] = PedigreeNode{
+				ID:   parentID,
+				Name: unknownLabel,
+				Sex:  "U",
+				Note: "record not found",
+			}
+		}
+		edges = append(edges, PedigreeEdge{From: parentID, To: childID, Type: edgeType})
+	}
+
+	for _, d := range docs {
+		m := d.Data()
+		childID := d.Ref.ID
+		addParentEdge(asString(m["motherId"]), childID, "mother", "（母 不明）")
+		addParentEdge(asString(m["fatherId"]), childID, "father", "（父 不明）")
+	}
+
+	nodes := make([]PedigreeNode, 0, len(nodesByID))
+	for _, n := range nodesByID {
+		if strings.TrimSpace(n.Name) == "" {
+			n.Name = "（不明）"
+		}
+		nodes = append(nodes, n)
+	}
+
+	return PedigreeResponse{
+		RootID: "",
+		Nodes:  nodes,
+		Edges:  edges,
+	}, nil
+}
+
 func loadServerConfig() serverConfig {
 	projectID := firstNonEmpty(
 		strings.TrimSpace(os.Getenv("FIREBASE_PROJECT_ID")),
@@ -502,4 +565,15 @@ func firstNonEmpty(values ...string) string {
 		}
 	}
 	return ""
+}
+
+func isNotFoundErr(err error) bool {
+	if err == nil {
+		return false
+	}
+	if status.Code(err) == codes.NotFound {
+		return true
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "notfound") || strings.Contains(msg, "not found")
 }

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Global Pedigree - Koala Map JP</title>
+  <style>
+    :root {
+      --ink: #1c1a16;
+      --ink-soft: #4a4036;
+      --paper: #f3ead8;
+      --paper-deep: #eadcc3;
+      --border: #b8a287;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", serif;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #fff7e8 0%, transparent 60%),
+        radial-gradient(900px 500px at 90% -20%, #fff0d8 0%, transparent 55%),
+        linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+    }
+    header {
+      padding: 14px 16px;
+      border-bottom: 2px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3));
+    }
+    .title { font-size: 20px; }
+    .meta { color: var(--ink-soft); font-size: 12px; margin-top: 6px; }
+    .controls {
+      margin-top: 8px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+    input, .btn {
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: #fff7ea;
+      color: var(--ink-soft);
+    }
+    input { min-width: 220px; }
+    .btn { cursor: pointer; }
+    #net {
+      height: calc(100vh - 128px);
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.58)),
+        url("./assets/image.png") center / cover no-repeat;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="title"><strong>家系図 全体図</strong></div>
+    <div class="meta"><a id="backLink" href="./zoo.html?zooId=higashiyama-zoo">← 一覧へ戻る</a></div>
+    <div class="meta">ノードクリックで個別家系図へ移動</div>
+    <div class="controls">
+      <input id="q" type="search" placeholder="名前でハイライト" />
+      <button id="fitAll" class="btn" type="button">全体表示</button>
+      <span id="count"></span>
+    </div>
+  </header>
+  <div id="net"></div>
+
+  <script>
+    const API_BASE = "/api";
+    const params = new URLSearchParams(location.search);
+    const zooId = params.get("zooId") || "higashiyama-zoo";
+    document.getElementById("backLink").href = `./zoo.html?zooId=${encodeURIComponent(zooId)}`;
+
+    main().catch(err => {
+      console.error(err);
+      alert("全体図の読み込みに失敗しました: " + err.message);
+    });
+
+    async function main() {
+      const res = await fetch(`${API_BASE}/pedigree/all`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const data = await res.json();
+
+      const rawNodes = (data.nodes || []).map(n => ({
+        id: n.id,
+        name: n.name || "（不明）",
+        sex: n.sex || "U",
+        birthDate: n.birthDate || ""
+      }));
+
+      const nodes = new vis.DataSet(rawNodes.map(n => ({
+        id: n.id,
+        label: formatLabel(n),
+        shape: "dot",
+        size: 15,
+        color: "#e6d6c1",
+        borderWidth: 1
+      })));
+
+      const edges = new vis.DataSet((data.edges || []).map(e => ({
+        from: e.from,
+        to: e.to,
+        arrows: "to",
+        color: e.type === "mother"
+          ? { color: "#b13a2a", highlight: "#b13a2a", hover: "#b13a2a" }
+          : { color: "#2f5c8f", highlight: "#2f5c8f", hover: "#2f5c8f" }
+      })));
+
+      document.getElementById("count").textContent = `ノード: ${rawNodes.length} / エッジ: ${(data.edges || []).length}`;
+
+      const network = new vis.Network(
+        document.getElementById("net"),
+        { nodes, edges },
+        {
+          physics: {
+            enabled: true,
+            stabilization: { iterations: 300 }
+          },
+          interaction: { hover: true },
+          nodes: {
+            font: {
+              color: "#1c1a16",
+              face: "Shippori Mincho, Noto Serif JP, Yu Mincho, serif",
+              size: 12,
+              align: "center"
+            }
+          },
+          edges: {
+            smooth: { type: "dynamic" },
+            width: 1.5
+          }
+        }
+      );
+
+      network.once("stabilizationIterationsDone", () => network.fit({ animation: true }));
+
+      network.on("click", (p) => {
+        const targetId = p?.nodes?.[0];
+        if (!targetId || String(targetId).startsWith("unknown:")) return;
+        location.href = `./pedigree.html?koalaId=${encodeURIComponent(targetId)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
+      });
+
+      const qInput = document.getElementById("q");
+      qInput.addEventListener("input", () => {
+        const q = (qInput.value || "").trim().toLowerCase();
+        nodes.update(rawNodes.map(n => ({
+          id: n.id,
+          label: formatLabel(n),
+          color: q !== "" && (n.name || "").toLowerCase().includes(q) ? "#ffd27f" : "#e6d6c1",
+          size: q !== "" && (n.name || "").toLowerCase().includes(q) ? 19 : 15
+        })));
+      });
+
+      document.getElementById("fitAll").addEventListener("click", () => network.fit({ animation: true }));
+    }
+
+    function formatLabel(n) {
+      const lines = [n.name];
+      if (n.sex) lines.push(n.sex);
+      if (n.birthDate) lines.push(n.birthDate);
+      return lines.join("\n");
+    }
+  </script>
+</body>
+</html>

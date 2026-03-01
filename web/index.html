@@ -8,41 +8,44 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #1f2738;
-      --ink-soft: #4f5a71;
-      --mist: #f5f9ff;
+      --ink: #183026;
+      --ink-soft: #465c52;
+      --leaf-1: #eef8f1;
+      --leaf-2: #cfe7d8;
+      --leaf-3: #9dc9b0;
+      --moss: #3f8964;
+      --euca: #62b286;
+      --paper: #f8fcf9;
       --card: #ffffff;
-      --frame: #d6e1f2;
-      --line: #b7c7e3;
-      --sky: #5b7dd9;
-      --mint: #2f9f8f;
-      --sun: #ffb84d;
+      --line: #bdd8c8;
+      --peach: #ffd8c2;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+      font-family: "M PLUS Rounded 1c", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(900px 520px at -10% -20%, #eaf2ff 0%, transparent 65%),
-        radial-gradient(1200px 700px at 110% -40%, #f0fffb 0%, transparent 60%),
-        linear-gradient(180deg, #f8fbff 0%, #eef3fb 100%);
+        radial-gradient(980px 600px at -10% -22%, #edf9f1 0%, transparent 62%),
+        radial-gradient(900px 540px at 110% -24%, #f4fff8 0%, transparent 56%),
+        linear-gradient(180deg, #fcfffc 0%, #eff8f2 100%);
     }
 
     header {
-      padding: 18px 16px 14px;
-      border-bottom: 1px solid var(--frame);
-      background: rgba(255, 255, 255, 0.72);
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(248, 255, 250, 0.88);
       backdrop-filter: blur(8px);
       position: sticky;
       top: 0;
       z-index: 10;
     }
+
     .headline {
       display: flex;
       align-items: flex-start;
@@ -50,32 +53,53 @@
       gap: 12px;
       flex-wrap: wrap;
     }
+
     .brand-title {
       margin: 0;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      font-size: clamp(20px, 2.7vw, 30px);
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      font-size: clamp(22px, 2.7vw, 32px);
+      position: relative;
+      display: inline-block;
+      padding-right: 22px;
     }
+
+    .brand-title::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 8px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50% 0;
+      background: linear-gradient(135deg, #91c9aa 0%, #61a37f 100%);
+      transform: rotate(-20deg);
+    }
+
     .brand-sub {
       color: var(--ink-soft);
       margin-top: 4px;
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: 500;
     }
+
     .hero-stats {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       align-items: center;
     }
+
     .stat {
-      border: 1px solid var(--frame);
+      border: 1px solid #a9ccb7;
       border-radius: 999px;
       padding: 6px 11px;
-      background: rgba(255, 255, 255, 0.9);
-      font-size: 12px;
+      background: rgba(255, 255, 255, 0.92);
+      font-size: 13px;
       color: var(--ink-soft);
-      font-weight: 600;
+      font-weight: 800;
     }
+
     .stat strong {
       color: var(--ink);
       margin-right: 4px;
@@ -83,19 +107,18 @@
 
     #app {
       display: grid;
-      grid-template-columns: minmax(280px, 1.2fr) minmax(320px, 0.9fr);
+      grid-template-columns: minmax(320px, 1.35fr) minmax(320px, 0.95fr);
       gap: 12px;
       padding: 12px;
-      min-height: calc(100vh - 94px);
+      min-height: calc(100vh - 96px);
     }
 
     .panel {
-      background: rgba(255, 255, 255, 0.62);
-      border: 1px solid var(--frame);
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 12px 24px rgba(32, 55, 102, 0.08);
-      position: relative;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 14px 28px rgba(41, 103, 72, 0.12);
     }
 
     #map {
@@ -107,21 +130,22 @@
       display: flex;
       flex-direction: column;
       min-height: 420px;
-      max-height: calc(100vh - 118px);
+      max-height: calc(100vh - 120px);
+      background:
+        linear-gradient(180deg, #f6fbf7 0%, #f2f8f3 100%);
     }
 
     .toolbar {
       padding: 12px;
-      border-bottom: 1px solid var(--frame);
+      border-bottom: 1px solid var(--line);
       display: grid;
       gap: 8px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.95), rgba(247,251,255,0.9));
+      background: linear-gradient(180deg, rgba(246,255,248,0.96), rgba(240,250,244,0.92));
     }
 
     .toolbar-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 170px;
       gap: 8px;
     }
 
@@ -130,10 +154,10 @@
     .btn {
       width: 100%;
       font-family: inherit;
-      font-size: 13px;
-      border: 1px solid var(--line);
+      font-size: 14px;
+      border: 1px solid #abd1bb;
       border-radius: 12px;
-      padding: 8px 10px;
+      padding: 10px 11px;
       background: #fff;
       color: var(--ink);
     }
@@ -146,19 +170,20 @@
 
     .btn {
       cursor: pointer;
-      background: #f7fbff;
-      font-weight: 700;
+      background: linear-gradient(180deg, #f5fff8 0%, #e7f7ed 100%);
+      font-weight: 800;
       transition: transform 120ms ease, box-shadow 120ms ease;
     }
+
     .btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(49, 83, 143, 0.14);
+      box-shadow: 0 6px 16px rgba(67, 128, 95, 0.2);
     }
 
     .count-line {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--ink-soft);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .cards {
@@ -170,38 +195,69 @@
 
     .card {
       background: var(--card);
-      border: 1px solid var(--frame);
-      border-radius: 14px;
+      border: 1px solid #c8e1d2;
+      border-radius: 16px;
       padding: 12px;
-      box-shadow: 0 8px 18px rgba(45, 67, 112, 0.08);
       cursor: pointer;
+      box-shadow: 0 10px 20px rgba(58, 104, 80, 0.1);
       opacity: 0;
       transform: translateY(8px);
       animation: rise 220ms ease forwards;
+      position: relative;
     }
-    .card:hover { border-color: #99b0d9; }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: linear-gradient(180deg, var(--leaf-3), var(--moss));
+      border-radius: 16px 0 0 16px;
+    }
+
+    .card:hover { border-color: #8fc4a7; }
+
     .card.active {
-      border-color: var(--sky);
-      box-shadow: 0 0 0 2px rgba(91, 125, 217, 0.2), 0 10px 18px rgba(45, 67, 112, 0.12);
+      border-color: var(--moss);
+      box-shadow: 0 0 0 2px rgba(79, 145, 108, 0.24), 0 12px 20px rgba(58, 104, 80, 0.14);
     }
+
     @keyframes rise {
       to { opacity: 1; transform: translateY(0); }
     }
 
     .row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-    .title { font-size: 16px; font-weight: 800; letter-spacing: 0.2px; }
+    .title { font-size: 17px; font-weight: 800; letter-spacing: 0.1px; }
+    .zoo-link {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: #8db9a2;
+      text-underline-offset: 2px;
+    }
+    .zoo-link:hover { color: #2e6b4a; }
+
     .badge {
-      font-size: 11px;
-      font-weight: 700;
-      border: 1px solid #b7c7e3;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid #afd4bd;
       border-radius: 999px;
-      padding: 2px 8px;
-      color: #365796;
-      background: #eff5ff;
+      padding: 4px 9px;
+      color: #276947;
+      background: #ebfaef;
       white-space: nowrap;
     }
-    .sub { color: var(--ink-soft); margin-top: 6px; font-size: 13px; }
-    .small { color: var(--ink-soft); margin-top: 6px; font-size: 12px; }
+    .badge-link {
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .badge-link:hover {
+      color: #1f5f3f;
+      background: #def5e6;
+      border-color: #94c8ab;
+    }
+
+    .sub { color: var(--ink-soft); margin-top: 6px; font-size: 14px; }
+    .small { color: #41594f; margin-top: 7px; font-size: 13px; line-height: 1.6; font-weight: 500; }
 
     .popup-actions {
       margin-top: 8px;
@@ -209,13 +265,14 @@
       gap: 6px;
       flex-wrap: wrap;
     }
+
     .action {
       display: inline-block;
-      font-size: 12px;
+      font-size: 13px;
       padding: 4px 8px;
       border-radius: 999px;
-      border: 1px solid var(--frame);
-      background: #f6faff;
+      border: 1px solid var(--line);
+      background: #f3fff7;
       color: var(--ink-soft);
       text-decoration: none;
     }
@@ -223,51 +280,80 @@
     .empty {
       margin: 12px;
       color: var(--ink-soft);
-      font-size: 12px;
+      font-size: 13px;
       text-align: center;
       display: none;
       border: 1px dashed var(--line);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 12px;
-      background: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.86);
     }
+
     .empty.show { display: block; }
 
     .leaflet-control-attribution {
-      background: rgba(255,255,255,0.76);
+      background: rgba(255,255,255,0.8);
       border-radius: 8px;
-      border: 1px solid var(--frame);
+      border: 1px solid var(--line);
       color: var(--ink-soft);
     }
-    .leaflet-popup-content-wrapper {
-      background: #fefefe;
-      border: 1px solid var(--frame);
-      border-radius: 12px;
-      box-shadow: 0 12px 24px rgba(37, 57, 99, 0.16);
-    }
-    .leaflet-popup-tip { background: #fefefe; }
 
-    #map .leaflet-tile {
-      filter: saturate(1.08) contrast(0.93) brightness(1.03);
+    .leaflet-popup-content-wrapper {
+      background: #fcfffd;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 12px 24px rgba(50, 93, 72, 0.16);
     }
+
+    .leaflet-popup-tip { background: #fcfffd; }
+
+    #map .leaflet-tile { filter: none; }
 
     .popup-card {
-      min-width: 220px;
+      min-width: 280px;
       display: grid;
-      grid-template-columns: 72px 1fr;
+      grid-template-columns: 84px 1fr;
       gap: 10px;
       align-items: center;
+      position: relative;
+      padding: 0 26px;
     }
+
     .popup-photo {
-      width: 72px;
-      height: 90px;
-      border-radius: 8px;
-      border: 1px solid var(--frame);
+      width: 84px;
+      height: 104px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
       object-fit: cover;
-      background: #eef3ff;
+      background: #eef6f0;
     }
-    .popup-title { font-weight: 800; }
-    .popup-sub { margin-top: 4px; color: var(--ink-soft); font-size: 12px; }
+
+    .popup-title { font-weight: 800; font-size: 14px; }
+    .popup-sub { margin-top: 4px; color: var(--ink-soft); font-size: 13px; line-height: 1.5; }
+    .popup-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid #a9ccb7;
+      background: #f5fff8;
+      color: #2e6b4a;
+      font-size: 15px;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+    .popup-nav.prev { left: -2px; }
+    .popup-nav.next { right: -2px; }
+    .popup-nav:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
 
     a { color: inherit; }
 
@@ -275,9 +361,11 @@
       #app {
         grid-template-columns: 1fr;
       }
+
       #map {
         min-height: 52vh;
       }
+
       #list {
         max-height: none;
       }
@@ -297,11 +385,11 @@
     <div class="headline">
       <div>
         <h1 class="brand-title">Koala Map JP</h1>
-        <div class="brand-sub">全国のコアラ展示施設を地図と一覧で確認</div>
+        <div class="brand-sub">コアラ名で検索して、どの動物園にいるかを確認</div>
       </div>
       <div class="hero-stats">
         <span id="statZoos" class="stat"><strong>動物園</strong>読み込み中</span>
-        <span id="statKoalas" class="stat"><strong>現存コアラ</strong>読み込み中</span>
+        <span id="statKoalas" class="stat"><strong>登録コアラ</strong>読み込み中</span>
         <span id="statUpdated" class="stat"><strong>最終確認</strong>-</span>
       </div>
     </div>
@@ -315,51 +403,41 @@
     <section id="list" class="panel">
       <div class="toolbar">
         <div class="toolbar-row">
-          <input id="q" type="search" placeholder="動物園名 / 都道府県 / 市区町村で検索" />
-          <select id="prefFilter">
-            <option value="">都道府県: すべて</option>
+          <input id="q" type="search" placeholder="コアラ名で検索（例: ティリー）" />
+          <select id="sortOrder">
+            <option value="name">並び順: 動物園名（あいうえお）</option>
+            <option value="koalas">並び順: 登録コアラ数（多い順）</option>
           </select>
         </div>
-        <div class="toolbar-row">
-          <select id="sortOrder">
-            <option value="name">並び順: 名前（あいうえお）</option>
-            <option value="pref">並び順: 都道府県</option>
-            <option value="koalas">並び順: コアラ数（多い順）</option>
-          </select>
-          <div class="btn-row">
-            <button id="clearSearch" class="btn" type="button">条件クリア</button>
-            <button id="fitAll" class="btn" type="button">全体表示</button>
-          </div>
+        <div class="btn-row">
+          <button id="clearSearch" class="btn" type="button">検索クリア</button>
+          <button id="fitAll" class="btn" type="button">全体表示</button>
         </div>
         <div id="count" class="count-line">読み込み中…</div>
       </div>
       <div id="cards" class="cards"></div>
-      <div id="empty" class="empty">該当する動物園がありません</div>
+      <div id="empty" class="empty">該当するコアラ名が見つかりません</div>
     </section>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore-compat.js"></script>
-  <script src="./firebase-config.js"></script>
   <script>
     const API_BASE = "/api";
-    const db = initFirestore();
 
-    const map = L.map("map").setView([36.2048, 138.2529], 5);
-    L.tileLayer("https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png", {
+    const map = L.map("map", { zoomControl: true }).setView([36.3, 138.1], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 20,
-      attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
     }).addTo(map);
+    const PIN_ICON_URL = "./assets/leaflet_pin.png";
 
     let allZoos = [];
     const markersById = new Map();
     const cardsById = new Map();
-    const koalaSummaryCache = new Map();
+    const koalaSummaryCache = new Map(); // zooId -> { countAll, aliveCount, koalas, sample }
     let activeId = null;
 
     const qInput = document.getElementById("q");
-    const prefFilter = document.getElementById("prefFilter");
     const sortOrder = document.getElementById("sortOrder");
     const cardsEl = document.getElementById("cards");
     const countEl = document.getElementById("count");
@@ -371,16 +449,14 @@
     const statUpdatedEl = document.getElementById("statUpdated");
 
     qInput.addEventListener("input", () => renderListAndMarkers());
-    prefFilter.addEventListener("change", () => renderListAndMarkers());
     sortOrder.addEventListener("change", () => renderListAndMarkers());
     clearSearchBtn.addEventListener("click", () => {
       qInput.value = "";
-      prefFilter.value = "";
       sortOrder.value = "name";
       renderListAndMarkers();
       qInput.focus();
     });
-    fitAllBtn.addEventListener("click", () => fitToAll());
+    fitAllBtn.addEventListener("click", () => fitToVisible());
 
     main().catch(err => {
       console.error(err);
@@ -394,48 +470,38 @@
       allZoos = zoos.filter(z => typeof z?.lat === "number" && typeof z?.lng === "number" && !(z.lat === 0 && z.lng === 0));
 
       for (const z of allZoos) {
-        const marker = L.marker([z.lat, z.lng]).addTo(map);
-        marker.bindPopup(buildPopupHtml(z, { loading: true }));
-        marker.on("click", () => {
-          setActive(z.id);
-          openPopupWithSummary(z);
-        });
+        const marker = L.marker([z.lat, z.lng], {
+          icon: createPinIcon(0)
+        }).addTo(map);
+
+        marker.bindTooltip(escapeHtml(z.name || "(no name)"), { direction: "top", offset: [0, -16] });
+        marker.bindPopup(buildPopupHtml(z, { loading: true }), { autoPan: false });
+        marker.on("click", () => focusZoo(z.id));
         markersById.set(z.id, marker);
       }
-
-      updatePrefOptions();
-      updateHeaderStats();
-      renderListAndMarkers();
-      fitToAll();
 
       await prefetchKoalaSummaries(allZoos, 4);
       updateHeaderStats();
       renderListAndMarkers();
+      fitToVisible();
     }
 
     function getFilteredAndSortedZoos() {
       const q = (qInput.value || "").trim().toLowerCase();
-      const pref = prefFilter.value;
       const sort = sortOrder.value;
 
       const filtered = allZoos.filter(z => {
-        const hay = `${z.name || ""} ${z.pref || ""} ${z.city || ""}`.toLowerCase();
-        const matchQ = q === "" ? true : hay.includes(q);
-        const matchPref = pref === "" ? true : (z.pref || "") === pref;
-        return matchQ && matchPref;
+        if (q === "") return true;
+        const summary = koalaSummaryCache.get(z.id);
+        const koalas = Array.isArray(summary?.koalas) ? summary.koalas : [];
+        return koalas.some(k => (k?.name || "").toLowerCase().includes(q));
       });
 
       const sorted = [...filtered].sort((a, b) => {
-        if (sort === "pref") {
-          const p = (a.pref || "").localeCompare(b.pref || "", "ja");
-          if (p !== 0) return p;
-          return (a.name || "").localeCompare(b.name || "", "ja");
-        }
         if (sort === "koalas") {
-          const ac = koalaSummaryCache.get(a.id)?.count ?? -1;
-          const bc = koalaSummaryCache.get(b.id)?.count ?? -1;
+          const ac = koalaSummaryCache.get(a.id)?.countAll ?? -1;
+          const bc = koalaSummaryCache.get(b.id)?.countAll ?? -1;
           if (bc !== ac) return bc - ac;
-          return (a.name || "").localeCompare(b.name || "", "ja");
         }
         return (a.name || "").localeCompare(b.name || "", "ja");
       });
@@ -446,7 +512,7 @@
     function renderListAndMarkers() {
       const filtered = getFilteredAndSortedZoos();
 
-      countEl.textContent = `${filtered.length} 件表示`;
+      countEl.textContent = `${filtered.length} 園表示`;
       emptyEl.classList.toggle("show", filtered.length === 0);
 
       cardsEl.innerHTML = "";
@@ -464,7 +530,10 @@
       }
       for (const z of filtered) {
         const m = markersById.get(z.id);
-        if (m) m.addTo(map);
+        if (m) {
+          applyMarkerStyle(m, koalaSummaryCache.get(z.id));
+          m.addTo(map);
+        }
       }
 
       if (activeId && !filtered.some(z => z.id === activeId)) {
@@ -476,27 +545,39 @@
       const el = document.createElement("div");
       el.className = "card";
       el.dataset.id = z.id;
-      el.style.animationDelay = `${Math.min(i * 18, 180)}ms`;
+      el.style.animationDelay = `${Math.min(i * 20, 180)}ms`;
 
+      const summary = koalaSummaryCache.get(z.id);
+      const aliveKoalas = Array.isArray(summary?.aliveKoalas) ? summary.aliveKoalas : [];
+      const aliveCount = summary?.aliveCount;
       const place = [z.pref, z.city].filter(Boolean).join(" ");
-      const verified = z.lastVerifiedAt ? `確認日: ${z.lastVerifiedAt}` : "";
       const url = z.officialUrl ? z.officialUrl : "";
-      const count = koalaSummaryCache.get(z.id)?.count;
-      const koalaBadge = typeof count === "number" ? `${count}頭` : "読込中";
+
+      const q = (qInput.value || "").trim().toLowerCase();
+      const matchedNames = q === ""
+        ? aliveKoalas.map(k => k.name).filter(Boolean)
+        : aliveKoalas.map(k => k.name).filter(n => (n || "").toLowerCase().includes(q));
+      const displayNames = matchedNames.slice(0, 8).join(" / ");
+      const more = matchedNames.length > 8 ? ` ほか${matchedNames.length - 8}頭` : "";
+
+      const koalaBadge = typeof aliveCount === "number" ? `${aliveCount}頭` : "読込中";
 
       el.innerHTML = `
         <div class="row">
-          <div class="title">${escapeHtml(z.name || "(no name)")}</div>
-          <div class="badge">コアラ ${escapeHtml(koalaBadge)}</div>
+          <div class="title">${
+            url
+              ? `<a class="zoo-link" href="${escapeAttr(url)}" target="_blank" rel="noreferrer">${escapeHtml(z.name || "(no name)")}</a>`
+              : `${escapeHtml(z.name || "(no name)")}`
+          }</div>
+          <a class="badge badge-link" href="./zoo.html?zooId=${encodeURIComponent(z.id)}">コアラ ${escapeHtml(koalaBadge)}</a>
         </div>
         <div class="sub">${escapeHtml(place)}</div>
-        <div class="small">${escapeHtml(verified)}</div>
-        <div class="popup-actions">
-          ${url ? `<a class="action" href="${escapeAttr(url)}" target="_blank" rel="noreferrer">公式サイト</a>` : ""}
-          <a class="action" href="./zoo.html?zooId=${encodeURIComponent(z.id)}">一覧を見る</a>
-        </div>
+        <div class="small">${displayNames ? `在籍: ${escapeHtml(displayNames)}${escapeHtml(more)}` : "在籍: 情報なし"}</div>
       `;
 
+      for (const a of el.querySelectorAll("a")) {
+        a.addEventListener("click", (ev) => ev.stopPropagation());
+      }
       el.addEventListener("click", () => focusZoo(z.id));
       return el;
     }
@@ -507,7 +588,7 @@
       if (!marker || !zoo) return;
 
       setActive(id);
-      map.setView([zoo.lat, zoo.lng], 14, { animate: true });
+      map.setView([zoo.lat, zoo.lng], 8, { animate: true });
       openPopupWithSummary(zoo);
     }
 
@@ -521,9 +602,15 @@
       }
     }
 
-    function fitToAll() {
-      const pts = allZoos.map(z => [z.lat, z.lng]);
-      if (pts.length > 0) map.fitBounds(pts, { padding: [30, 30] });
+    function fitToVisible() {
+      const points = [];
+      for (const [id, marker] of markersById.entries()) {
+        if (map.hasLayer(marker)) {
+          const z = allZoos.find(v => v.id === id);
+          if (z) points.push([z.lat, z.lng]);
+        }
+      }
+      if (points.length > 0) map.fitBounds(points, { padding: [28, 28] });
     }
 
     async function openPopupWithSummary(z) {
@@ -531,99 +618,59 @@
       if (!marker) return;
       marker.setPopupContent(buildPopupHtml(z, { loading: true }));
       marker.openPopup();
+      bindPopupNav(marker);
 
       try {
         const summary = await getKoalaSummary(z.id);
         marker.setPopupContent(buildPopupHtml(z, summary));
+        bindPopupNav(marker);
       } catch (err) {
         marker.setPopupContent(buildPopupHtml(z, { error: err?.message || "failed" }));
+        bindPopupNav(marker);
       }
+    }
+
+    function applyMarkerStyle(marker, summary) {
+      const aliveCount = summary?.aliveCount ?? 0;
+      marker.setIcon(createPinIcon(aliveCount));
+    }
+
+    function createPinIcon(aliveCount) {
+      const size = Math.min(84, 56 + (aliveCount || 0) * 3);
+      return L.icon({
+        iconUrl: PIN_ICON_URL,
+        iconSize: [size, size],
+        iconAnchor: [Math.round(size / 2), size - 2],
+        popupAnchor: [0, -Math.round(size * 0.65)],
+        tooltipAnchor: [0, -Math.round(size * 0.55)]
+      });
     }
 
     async function getKoalaSummary(zooId) {
       if (koalaSummaryCache.has(zooId)) return koalaSummaryCache.get(zooId);
-      const koalas = await getKoalasByZoo(zooId, "alive");
+      const koalas = await getKoalasByZoo(zooId, "");
       const list = Array.isArray(koalas) ? koalas : [];
+      const aliveKoalas = list.filter(k => (k.status || "") === "alive");
+      const aliveCount = aliveKoalas.length;
       const sample = list.find(k => k?.name) || list[0] || null;
-      const summary = { count: list.length, sample };
+      const summary = { countAll: list.length, aliveCount, koalas: list, aliveKoalas, sample };
       koalaSummaryCache.set(zooId, summary);
       return summary;
     }
 
     async function getZoos() {
-      if (db) {
-        const snap = await db.collection("zoos").get();
-        return snap.docs.map(toZooFromDoc);
-      }
       const res = await fetch(`${API_BASE}/zoos`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       return res.json();
     }
 
     async function getKoalasByZoo(zooId, status) {
-      if (db) {
-        const snap = await db.collection("koalas").where("currentZooId", "==", zooId).get();
-        const all = snap.docs.map(toKoalaFromDoc);
-        if (!status) return all;
-        return all.filter(k => (k.status || "") === status);
-      }
       const params = new URLSearchParams();
       if (status) params.set("status", status);
       const qs = params.toString();
       const res = await fetch(`${API_BASE}/zoos/${encodeURIComponent(zooId)}/koalas${qs ? `?${qs}` : ""}`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       return res.json();
-    }
-
-    function toZooFromDoc(doc) {
-      const m = doc.data() || {};
-      const geo = m.geo || {};
-      return {
-        id: doc.id,
-        name: asString(m.name),
-        pref: asString(m.pref),
-        city: asString(m.city),
-        status: asString(m.status),
-        officialUrl: asString(m.officialUrl),
-        lastVerifiedAt: asString(m.lastVerifiedAt),
-        lat: asNumber(geo.lat, m.lat),
-        lng: asNumber(geo.lng, m.lng),
-        note: asString(m.note),
-      };
-    }
-
-    function toKoalaFromDoc(doc) {
-      const m = doc.data() || {};
-      return {
-        id: doc.id,
-        name: asString(m.name),
-        sex: asString(m.sex),
-        birthDate: asString(m.birthDate),
-        status: asString(m.status),
-        currentZooId: asString(m.currentZooId),
-        motherId: asString(m.motherId),
-        fatherId: asString(m.fatherId),
-        photoUrl: asString(m.photoUrl),
-      };
-    }
-
-    function asString(v) {
-      return typeof v === "string" ? v : "";
-    }
-
-    function asNumber(...values) {
-      for (const v of values) {
-        if (typeof v === "number" && Number.isFinite(v)) return v;
-      }
-      return 0;
-    }
-
-    function initFirestore() {
-      if (!window.firebase || !window.__FIREBASE_CONFIG__) return null;
-      const cfg = window.__FIREBASE_CONFIG__;
-      if (!cfg.apiKey || !cfg.projectId || !cfg.appId) return null;
-      if (!firebase.apps.length) firebase.initializeApp(cfg);
-      return firebase.firestore();
     }
 
     async function prefetchKoalaSummaries(zoos, concurrency) {
@@ -633,7 +680,9 @@
           const z = queue.shift();
           if (!z) return;
           try {
-            await getKoalaSummary(z.id);
+            const summary = await getKoalaSummary(z.id);
+            const marker = markersById.get(z.id);
+            if (marker) applyMarkerStyle(marker, summary);
           } catch {
           }
         }
@@ -641,40 +690,72 @@
       await Promise.all(workers);
     }
 
-    function updatePrefOptions() {
-      const prefs = [...new Set(allZoos.map(z => z.pref).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ja"));
-      prefFilter.innerHTML = `<option value="">都道府県: すべて</option>` + prefs.map(p => `<option value="${escapeAttr(p)}">${escapeHtml(p)}</option>`).join("");
-    }
-
     function updateHeaderStats() {
       const zooCount = allZoos.length;
-      let aliveKoalas = 0;
+      let totalKoalas = 0;
       for (const s of koalaSummaryCache.values()) {
-        if (typeof s?.count === "number") aliveKoalas += s.count;
+        if (typeof s?.countAll === "number") totalKoalas += s.countAll;
       }
 
       const dates = allZoos.map(z => z.lastVerifiedAt).filter(Boolean).sort();
       const latest = dates.length > 0 ? dates[dates.length - 1] : "-";
 
       statZoosEl.innerHTML = `<strong>動物園</strong>${zooCount}件`;
-      statKoalasEl.innerHTML = `<strong>現存コアラ</strong>${aliveKoalas > 0 ? `${aliveKoalas}頭` : "集計中"}`;
+      statKoalasEl.innerHTML = `<strong>登録コアラ</strong>${totalKoalas > 0 ? `${totalKoalas}頭` : "集計中"}`;
       statUpdatedEl.innerHTML = `<strong>最終確認</strong>${escapeHtml(latest)}`;
+    }
+
+    function getNeighborZooIds(centerId) {
+      // 矢印ナビはUIの並び順ではなく、経度順（西→東）で移動する。
+      const list = [...getFilteredAndSortedZoos()].sort((a, b) => {
+        const lngDiff = (a.lng || 0) - (b.lng || 0);
+        if (lngDiff !== 0) return lngDiff;
+        const latDiff = (b.lat || 0) - (a.lat || 0);
+        if (latDiff !== 0) return latDiff;
+        return (a.name || "").localeCompare(b.name || "", "ja");
+      });
+      const idx = list.findIndex(z => z.id === centerId);
+      if (idx < 0 || list.length === 0) return { prevId: "", nextId: "" };
+      if (list.length === 1) return { prevId: list[0].id, nextId: list[0].id };
+      return {
+        prevId: list[(idx - 1 + list.length) % list.length].id,
+        nextId: list[(idx + 1) % list.length].id
+      };
+    }
+
+    function bindPopupNav(marker) {
+      const popupEl = marker.getPopup()?.getElement();
+      if (!popupEl) return;
+      for (const btn of popupEl.querySelectorAll(".popup-nav")) {
+        btn.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const targetId = btn.getAttribute("data-target-id") || "";
+          if (!targetId) return;
+          focusZoo(targetId);
+        });
+      }
     }
 
     function buildPopupHtml(z, summary) {
       const title = z.name || "(no name)";
       const place = [z.pref, z.city].filter(Boolean).join(" ");
       const verified = z.lastVerifiedAt ? `確認日: ${z.lastVerifiedAt}` : "";
-      const url = z.officialUrl ? `<a class="action" href="${escapeAttr(z.officialUrl)}" target="_blank" rel="noreferrer">公式サイト</a>` : "";
-      const zooLink = `<a class="action" href="./zoo.html?zooId=${encodeURIComponent(z.id)}">一覧を見る</a>`;
+      const titleLink = z.officialUrl
+        ? `<a class="zoo-link" href="${escapeAttr(z.officialUrl)}" target="_blank" rel="noreferrer">${escapeHtml(title)}</a>`
+        : escapeHtml(title);
+      const nav = getNeighborZooIds(z.id);
 
       let countText = "コアラ数: 読み込み中...";
+      let namesText = "";
       let photoUrl = placeholderPhoto(title);
       let photoAlt = title;
       if (summary?.error) {
         countText = "コアラ数: 取得失敗";
-      } else if (typeof summary?.count === "number") {
-        countText = `現在のコアラ: ${summary.count}頭`;
+      } else if (typeof summary?.countAll === "number") {
+        countText = `登録コアラ: ${summary.countAll}頭（現存: ${summary.aliveCount}頭）`;
+        const names = (summary.aliveKoalas || []).map(k => k.name).filter(Boolean).slice(0, 6);
+        namesText = names.length ? `在籍: ${names.join(" / ")}` : "在籍: 情報なし";
         if (summary.sample) {
           photoUrl = koalaPhotoUrl(summary.sample);
           photoAlt = summary.sample.name || title;
@@ -683,13 +764,15 @@
 
       return `
         <div class="popup-card">
+          <button class="popup-nav prev" data-target-id="${escapeAttr(nav.prevId)}" ${nav.prevId ? "" : "disabled"} aria-label="前の動物園">◀</button>
+          <button class="popup-nav next" data-target-id="${escapeAttr(nav.nextId)}" ${nav.nextId ? "" : "disabled"} aria-label="次の動物園">▶</button>
           <img class="popup-photo" src="${photoUrl}" alt="${escapeAttr(photoAlt)}">
           <div>
-            <div class="popup-title">${escapeHtml(title)}</div>
+            <div class="popup-title">${titleLink}</div>
             <div class="popup-sub">${escapeHtml(place)}</div>
             <div class="popup-sub">${escapeHtml(verified)}</div>
             <div class="popup-sub">${escapeHtml(countText)}</div>
-            <div class="popup-actions">${url}${zooLink}</div>
+            <div class="popup-sub">${escapeHtml(namesText)}</div>
           </div>
         </div>
       `;
@@ -707,18 +790,24 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="240" height="300">
           <defs>
             <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#eef4ff"/>
-              <stop offset="1" stop-color="#dce8ff"/>
+              <stop offset="0" stop-color="#f4fff8"/>
+              <stop offset="1" stop-color="#dff3e7"/>
             </linearGradient>
           </defs>
           <rect width="100%" height="100%" fill="url(#g)"/>
-          <circle cx="72" cy="96" r="44" fill="#c4d5f2"/>
-          <circle cx="168" cy="96" r="44" fill="#c4d5f2"/>
-          <circle cx="120" cy="140" r="56" fill="#dce7fb"/>
-          <circle cx="120" cy="160" r="20" fill="#92a8d7"/>
-          <circle cx="104" cy="130" r="7" fill="#3a4e77"/>
-          <circle cx="136" cy="130" r="7" fill="#3a4e77"/>
-          <text x="50%" y="250" text-anchor="middle" font-size="22" fill="#35548e" font-family="Zen Kaku Gothic New, sans-serif">${text}</text>
+          <ellipse cx="120" cy="230" rx="72" ry="18" fill="#d2e9da"/>
+          <circle cx="74" cy="95" r="40" fill="#c6ddce"/>
+          <circle cx="166" cy="95" r="40" fill="#c6ddce"/>
+          <circle cx="120" cy="134" r="56" fill="#e3f2e8"/>
+          <circle cx="102" cy="130" r="9" fill="#2e5140"/>
+          <circle cx="138" cy="130" r="9" fill="#2e5140"/>
+          <circle cx="100" cy="127" r="3" fill="#ffffff"/>
+          <circle cx="136" cy="127" r="3" fill="#ffffff"/>
+          <ellipse cx="120" cy="156" rx="16" ry="13" fill="#86aa95"/>
+          <ellipse cx="93" cy="150" rx="8" ry="5" fill="#f5c4bc"/>
+          <ellipse cx="147" cy="150" rx="8" ry="5" fill="#f5c4bc"/>
+          <path d="M106 174 Q120 186 134 174" stroke="#638d76" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <text x="50%" y="262" text-anchor="middle" font-size="22" fill="#2f6d4d" font-family="M PLUS Rounded 1c, Zen Kaku Gothic New, sans-serif">${text}</text>
         </svg>
       `;
       return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

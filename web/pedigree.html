@@ -163,8 +163,8 @@
       <div class="seal">系図</div>
       <div><strong id="title">家系図</strong></div>
     </div>
-    <div class="meta"><a id="backLink" href="./zoo.html?zooId=higashiyama-zoo">← 一覧へ戻る</a></div>
-    <div class="meta">クリック/ドラッグで移動、ホイールで拡大</div>
+    <div class="meta"><a id="backLink" href="./zoo.html?zooId=higashiyama-zoo">← 一覧へ戻る</a> / <a id="allLink" href="./pedigree-all.html">全体図へ</a></div>
+    <div class="meta">ノードクリックでその個体へ移動、ドラッグで移動、ホイールで拡大</div>
     <div class="controls">
       <label><input id="toggleSex" type="checkbox" checked> 性別</label>
       <label><input id="toggleBirth" type="checkbox" checked> 誕生日</label>
@@ -184,6 +184,10 @@
     const koalaId = params.get("koalaId") || "monaka";
     const depth = params.get("depth") || "2";
     const includeChildren = params.get("includeChildren") || "1";
+    const zooId = params.get("zooId") || "higashiyama-zoo";
+
+    document.getElementById("backLink").href = `./zoo.html?zooId=${encodeURIComponent(zooId)}`;
+    document.getElementById("allLink").href = `./pedigree-all.html?zooId=${encodeURIComponent(zooId)}`;
 
     document.getElementById("title").textContent = `家系図: ${koalaId} (depth=${depth})`;
 
@@ -204,6 +208,24 @@
         sex: n.sex || "U",
         birthDate: n.birthDate || ""
       }));
+      const nodeNameById = new Map(rawNodes.map(n => [n.id, n.name || "（不明）"]));
+
+      const fatherByChildId = new Map(
+        data.edges
+          .filter(e => e.type === "father")
+          .map(e => [e.to, e.from])
+      );
+      const motherChildren = new Map();
+      for (const e of data.edges) {
+        if (e.type !== "mother") continue;
+        if (!motherChildren.has(e.from)) motherChildren.set(e.from, []);
+        motherChildren.get(e.from).push(e.to);
+      }
+      const mothersWithMultipleChildren = new Set(
+        [...motherChildren.entries()]
+          .filter(([, children]) => children.length >= 2)
+          .map(([motherId]) => motherId)
+      );
 
       const nodes = rawNodes.map(n => ({
         id: n.id,
@@ -219,14 +241,27 @@
       }));
 
       // edges (parent -> child)
-      const edges = data.edges.map(e => ({
-        from: e.from,
-        to: e.to,
-        arrows: "to",
-        color: e.type === "mother"
-          ? { color: "#b13a2a", highlight: "#b13a2a", hover: "#b13a2a" }
-          : { color: "#2f5c8f", highlight: "#2f5c8f", hover: "#2f5c8f" }
-      }));
+      const edges = data.edges.map(e => {
+        const edge = {
+          from: e.from,
+          to: e.to,
+          arrows: "to",
+          color: e.type === "mother"
+            ? { color: "#b13a2a", highlight: "#b13a2a", hover: "#b13a2a" }
+            : { color: "#2f5c8f", highlight: "#2f5c8f", hover: "#2f5c8f" }
+        };
+
+        // 母が複数の子を持つ場合は、各子どもの父情報を母系エッジに出して見分けやすくする。
+        if (e.type === "mother" && mothersWithMultipleChildren.has(e.from)) {
+          const fatherId = fatherByChildId.get(e.to);
+          if (fatherId) {
+            const fatherName = nodeNameById.get(fatherId) || "（父 不明）";
+            edge.label = `父: ${fatherName}`;
+            edge.title = `父: ${fatherName}`;
+          }
+        }
+        return edge;
+      });
 
       const container = document.getElementById("net");
       const toggleSex = document.getElementById("toggleSex");
@@ -290,6 +325,15 @@
       };
 
       const network = new vis.Network(container, networkData, options);
+      network.on("click", (p) => {
+        const targetId = p?.nodes?.[0];
+        if (!targetId || String(targetId).startsWith("unknown:")) return;
+        const next = new URLSearchParams(location.search);
+        next.set("koalaId", targetId);
+        next.set("depth", depth);
+        next.set("includeChildren", includeChildren);
+        location.href = `./pedigree.html?${next.toString()}`;
+      });
 
       function updateLabels() {
         const next = rawNodes.map(n => ({
