@@ -22,6 +22,26 @@ services:
       - "4000:4000"
     volumes:
       - ./:/workspace
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4000"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  seed:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: koala-map-seed
+    environment:
+      FIREBASE_PROJECT_ID: koala-map-jp
+      FIRESTORE_EMULATOR_HOST: firestore:8081
+    depends_on:
+      firestore:
+        condition: service_healthy
+    entrypoint: ["/app/seed"]
+    restart: "no"
 
   api:
     build:
@@ -34,7 +54,8 @@ services:
       SERVE_STATIC: "false"
       PORT: "8080"
     depends_on:
-      - firestore
+      firestore:
+        condition: service_healthy
     ports:
       - "8080:8080"
 
@@ -48,18 +69,3 @@ services:
     volumes:
       - ./web:/usr/share/nginx/html:ro
       - ./infra/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-
-  seed:
-    image: golang:1.25
-    container_name: koala-map-seed
-    working_dir: /workspace/api
-    environment:
-      FIREBASE_PROJECT_ID: koala-map-jp
-      FIRESTORE_EMULATOR_HOST: firestore:8081
-    depends_on:
-      - firestore
-    command: ["go", "run", "./cmd/seed"]
-    volumes:
-      - ./:/workspace
-    profiles:
-      - tools
