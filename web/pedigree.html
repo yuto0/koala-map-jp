@@ -136,8 +136,8 @@
       border-radius: 50%;
       display: inline-block;
     }
-    .dot.mother { background: #b13a2a; }
-    .dot.father { background: #2f5c8f; }
+    .dot.female { background: #b13a2a; }
+    .dot.male   { background: #2f5c8f; }
 
     a { color: inherit; }
 
@@ -164,12 +164,14 @@
       <div><strong id="title">家系図</strong></div>
     </div>
     <div class="meta"><a id="backLink" href="./zoo.html?zooId=higashiyama-zoo">← 一覧へ戻る</a> / <a id="allLink" href="./pedigree-all.html">全体図へ</a></div>
-    <div class="meta">ノードクリックでその個体へ移動、ドラッグで移動、ホイールで拡大</div>
+    <div class="meta">ノードクリックでその個体に移動 / ドラッグで移動 / ホイールで拡大</div>
     <div class="controls">
       <label><input id="toggleSex" type="checkbox" checked> 性別</label>
-      <label><input id="toggleBirth" type="checkbox" checked> 誕生日</label>
-      <span class="legend"><span class="dot mother"></span>母系</span>
-      <span class="legend"><span class="dot father"></span>父系</span>
+      <label><input id="toggleBirth" type="checkbox" checked> 生年月日</label>
+      <span class="legend"><span class="dot female"></span>メス</span>
+      <span class="legend"><span class="dot male"></span>オス</span>
+      <span class="legend" style="color:var(--ink-soft)">† 天国</span>
+      <span class="legend" style="color:var(--ink-soft)">▲ さらに遡れる</span>
       <button id="centerRoot" class="btn" type="button">中心へ</button>
       <button id="fitAll" class="btn" type="button">全体表示</button>
     </div>
@@ -182,14 +184,12 @@
 
     const params = new URLSearchParams(location.search);
     const koalaId = params.get("koalaId") || "monaka";
-    const depth = params.get("depth") || "2";
-    const includeChildren = params.get("includeChildren") || "1";
+    const depth = parseInt(params.get("depth") || "2");
+    const includeChildren = (params.get("includeChildren") || "1") !== "0";
     const zooId = params.get("zooId") || "higashiyama-zoo";
 
     document.getElementById("backLink").href = `./zoo.html?zooId=${encodeURIComponent(zooId)}`;
     document.getElementById("allLink").href = `./pedigree-all.html?zooId=${encodeURIComponent(zooId)}`;
-
-    document.getElementById("title").textContent = `家系図: ${koalaId} (depth=${depth})`;
 
     main().catch(err => {
       console.error(err);
@@ -197,7 +197,7 @@
     });
 
     async function main() {
-      const res = await fetch(`${API_BASE}/koalas/${encodeURIComponent(koalaId)}/pedigree?depth=${encodeURIComponent(depth)}&includeChildren=${encodeURIComponent(includeChildren)}`);
+      const res = await fetch(`${API_BASE}/koalas/${encodeURIComponent(koalaId)}/pedigree?depth=${depth}&includeChildren=${includeChildren ? 1 : 0}`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
 
@@ -206,182 +206,214 @@
         id: n.id,
         name: n.name || "（不明）",
         sex: n.sex || "U",
-        birthDate: n.birthDate || ""
+        birthDate: n.birthDate || "",
+        status: n.status || "unknown",
+        hasParents: !!n.hasParents,
       }));
-      const nodeNameById = new Map(rawNodes.map(n => [n.id, n.name || "（不明）"]));
+      const nodeMap = new Map(rawNodes.map(n => [n.id, n]));
 
-      const fatherByChildId = new Map(
-        data.edges
-          .filter(e => e.type === "father")
-          .map(e => [e.to, e.from])
-      );
-      const motherChildren = new Map();
-      for (const e of data.edges) {
-        if (e.type !== "mother") continue;
-        if (!motherChildren.has(e.from)) motherChildren.set(e.from, []);
-        motherChildren.get(e.from).push(e.to);
+      // ページタイトル更新
+      const rootRaw = nodeMap.get(rootId);
+      if (rootRaw) {
+        document.getElementById("title").textContent = `${rootRaw.name} の家系図`;
       }
-      const mothersWithMultipleChildren = new Set(
-        [...motherChildren.entries()]
-          .filter(([, children]) => children.length >= 2)
-          .map(([motherId]) => motherId)
-      );
 
-      const nodes = rawNodes.map(n => ({
-        id: n.id,
-        label: formatLabel(n),
-        shape: "circularImage",
-        image: placeholderPhoto(n.name || "Koala"),
-        size: n.id === rootId ? 36 : 30,
-        borderWidth: n.id === rootId ? 3 : 2,
-        color: n.id === rootId
-          ? { background: "#fff7e6", border: "#8b2a1b", highlight: { background: "#fff7e6", border: "#8b2a1b" }, hover: { background: "#fff7e6", border: "#8b2a1b" } }
-          : undefined,
-        margin: { top: 12, right: 16, bottom: 12, left: 16 },
-      }));
+      // エッジから関係マップを構築
+      const childToMother = new Map(); // childId → motherId
+      const childToFather = new Map(); // childId → fatherId
+      const motherToChildren = new Map();
+      const fatherToChildren = new Map();
 
-      // edges (parent -> child)
-      const edges = data.edges.map(e => {
-        const edge = {
-          from: e.from,
-          to: e.to,
-          arrows: "to",
-          color: e.type === "mother"
-            ? { color: "#b13a2a", highlight: "#b13a2a", hover: "#b13a2a" }
-            : { color: "#2f5c8f", highlight: "#2f5c8f", hover: "#2f5c8f" }
-        };
+      for (const e of data.edges) {
+        if (e.type === "mother") {
+          childToMother.set(e.to, e.from);
+          if (!motherToChildren.has(e.from)) motherToChildren.set(e.from, []);
+          motherToChildren.get(e.from).push(e.to);
+        } else {
+          childToFather.set(e.to, e.from);
+          if (!fatherToChildren.has(e.from)) fatherToChildren.set(e.from, []);
+          fatherToChildren.get(e.from).push(e.to);
+        }
+      }
 
-        // 母が複数の子を持つ場合は、各子どもの父情報を母系エッジに出して見分けやすくする。
-        if (e.type === "mother" && mothersWithMultipleChildren.has(e.from)) {
-          const fatherId = fatherByChildId.get(e.to);
-          if (fatherId) {
-            const fatherName = nodeNameById.get(fatherId) || "（父 不明）";
-            edge.label = `父: ${fatherName}`;
-            edge.title = `父: ${fatherName}`;
+      // 祖先セット（ルートから上方向にBFS）
+      const ancestorSet = new Set([rootId]);
+      const ancQ = [rootId];
+      while (ancQ.length > 0) {
+        const nid = ancQ.shift();
+        const mid = childToMother.get(nid);
+        const fid = childToFather.get(nid);
+        if (mid && !ancestorSet.has(mid)) { ancestorSet.add(mid); ancQ.push(mid); }
+        if (fid && !ancestorSet.has(fid)) { ancestorSet.add(fid); ancQ.push(fid); }
+      }
+
+      // パートナーセット（ルートの子の共同親で、祖先でないもの）
+      const partnerSet = new Set();
+      const rootChildren = [
+        ...(motherToChildren.get(rootId) || []),
+        ...(fatherToChildren.get(rootId) || []),
+      ];
+      for (const cid of rootChildren) {
+        const mid = childToMother.get(cid);
+        const fid = childToFather.get(cid);
+        if (mid && !ancestorSet.has(mid)) partnerSet.add(mid);
+        if (fid && !ancestorSet.has(fid)) partnerSet.add(fid);
+      }
+
+      // ルートに祖先がいるかどうか（ancestorSet はルート自身を含む）
+      const rootHasAncestors = ancestorSet.size > 1;
+
+      // 子どもを（母, 父）ペアでグループ化 → ユニオンノード生成
+      const pairMap = new Map(); // "motherId|fatherId" → { motherId, fatherId, children[] }
+      for (const n of rawNodes) {
+        const mid = childToMother.get(n.id) || "";
+        const fid = childToFather.get(n.id) || "";
+        if (!mid && !fid) continue;
+        const key = `${mid}|${fid}`;
+        if (!pairMap.has(key)) pairMap.set(key, { motherId: mid, fatherId: fid, children: [] });
+        pairMap.get(key).children.push(n.id);
+      }
+
+      // ユニオンノードと再構築したエッジを生成
+      const rootLevel = depth * 2;
+      const unionNodes = [];
+      const structuredEdges = [];
+
+      for (const [key, { motherId: mid, fatherId: fid, children }] of pairMap) {
+        if (mid && fid) {
+          // 両親が揃っている → ユニオンノード経由
+          const unionId = `union:${key}`;
+          const mName = nodeMap.get(mid)?.name || "";
+          const fName = nodeMap.get(fid)?.name || "";
+          unionNodes.push({
+            id: unionId,
+            label: "",
+            shape: "dot",
+            size: 7,
+            color: { background: "#c4a882", border: "#c4a882", highlight: { background: "#a08060", border: "#a08060" }, hover: { background: "#a08060", border: "#a08060" } },
+            title: `${mName} × ${fName}`,
+            font: { size: 1 },
+          });
+          structuredEdges.push({ from: mid, to: unionId, arrows: "", width: 2, color: { color: "#b13a2a" }, smooth: { type: "straightCross" } });
+          structuredEdges.push({ from: fid, to: unionId, arrows: "", width: 2, color: { color: "#2f5c8f" }, smooth: { type: "straightCross" } });
+          for (const cid of children) {
+            structuredEdges.push({ from: unionId, to: cid, arrows: "to", width: 1.5, color: { color: "#7a6045" }, smooth: { type: "cubicBezier", forceDirection: "vertical", roundness: 0.3 } });
+          }
+        } else {
+          // 片親のみ → 直接エッジ
+          const parentId = mid || fid;
+          const color = mid ? "#b13a2a" : "#2f5c8f";
+          for (const cid of children) {
+            structuredEdges.push({ from: parentId, to: cid, arrows: "to", width: 2, color: { color }, smooth: { type: "cubicBezier", forceDirection: "vertical", roundness: 0.3 } });
           }
         }
-        return edge;
-      });
+      }
 
-      const container = document.getElementById("net");
+      // ノードカラー（性別 × 生死）
+      function nodeColors(sex, deceased) {
+        if (sex === "M") return { bg: deceased ? "#e8f2fc" : "#dce8f5", border: deceased ? "#7aacce" : "#2f5c8f" };
+        if (sex === "F") return { bg: deceased ? "#fceef4" : "#f5dce8", border: deceased ? "#d4879d" : "#b13a2a" };
+        return { bg: deceased ? "#f0f0f0" : "#e8e8e8", border: deceased ? "#bbb" : "#999" };
+      }
+
       const toggleSex = document.getElementById("toggleSex");
       const toggleBirth = document.getElementById("toggleBirth");
-      const centerRootBtn = document.getElementById("centerRoot");
-      const fitAllBtn = document.getElementById("fitAll");
+
+      function formatLabel(n) {
+        const showSex = toggleSex?.checked ?? true;
+        const showBirth = toggleBirth?.checked ?? true;
+        const sym = n.sex === "M" ? "♂" : n.sex === "F" ? "♀" : "?";
+        const lines = [showSex ? `${sym} ${n.name}` : n.name];
+        if (showBirth && n.birthDate && !n.birthDate.startsWith("????")) lines.push(n.birthDate);
+        if (n.status === "deceased") lines.push("† 天国");
+        if (n.hasParents) lines.push("▲ 遡れる");
+        return lines.join("\n");
+      }
+
+      function buildVisNode(n) {
+        const isRoot = n.id === rootId;
+        const deceased = n.status === "deceased";
+        const { bg, border } = nodeColors(n.sex, deceased);
+        const node = {
+          id: n.id,
+          label: formatLabel(n),
+          shape: "ellipse",
+          color: {
+            background: bg,
+            border: isRoot ? "#8b2a1b" : border,
+            highlight: { background: bg, border: "#8b2a1b" },
+            hover: { background: bg, border },
+          },
+          borderWidth: isRoot ? 3 : 2,
+          shapeProperties: deceased ? { borderDashes: [5, 3] } : {},
+          shadow: { enabled: true, color: "rgba(0,0,0,0.12)", size: 6, x: 2, y: 2 },
+          title: n.hasParents ? `${n.name}（クリックでさらに遡る）` : n.name,
+        };
+        // パートナーはルートと同じ階層に固定
+        // ルートに祖先がない場合（例: ishin）はlevel 0に置く
+        if (partnerSet.has(n.id)) node.level = rootHasAncestors ? rootLevel : 0;
+        return node;
+      }
+
       const networkData = {
-        nodes: new vis.DataSet(nodes),
-        edges: new vis.DataSet(edges),
+        nodes: new vis.DataSet([...rawNodes.map(buildVisNode), ...unionNodes]),
+        edges: new vis.DataSet(structuredEdges),
       };
 
-      // それっぽい家系図：上に祖父母→親→子 の階層に寄せる
-      // 「親→子」方向を下向きにする
       const options = {
         physics: false,
         layout: {
           hierarchical: {
             enabled: true,
-            direction: "UD",     // Up->Down
+            direction: "UD",
             sortMethod: "directed",
-            levelSeparation: 140,
-            nodeSpacing: 190
+            levelSeparation: 120,
+            nodeSpacing: 200,
+            treeSpacing: 220,
+            blockShifting: true,
+            edgeMinimization: true,
+            parentCentralization: true,
           }
         },
         nodes: {
-          shape: "circularImage",
-          borderWidth: 2,
-          color: {
-            background: "#f8f1e3",
-            border: "#b19a7d",
-            highlight: { background: "#fff7e6", border: "#8b2a1b" },
-            hover: { background: "#fff7e6", border: "#8b2a1b" }
-          },
-          size: 30,
           font: {
             color: "#1c1a16",
             face: "Shippori Mincho, Noto Serif JP, Yu Mincho, serif",
-            size: 15,
+            size: 13,
             align: "center",
-            multi: "markdown"
           },
-          shadow: {
-            enabled: true,
-            color: "rgba(0,0,0,0.15)",
-            size: 8,
-            x: 2,
-            y: 2
-          }
+          widthConstraint: { minimum: 80, maximum: 150 },
         },
         edges: {
-          width: 2,
           smooth: { type: "cubicBezier", forceDirection: "vertical", roundness: 0.4 },
-          font: {
-            align: "middle",
-            face: "Shippori Mincho, Noto Serif JP, Yu Mincho, serif",
-            size: 12,
-            color: "#4a4036",
-            strokeWidth: 0
-          }
+        },
+        interaction: {
+          hover: true,
+          tooltipDelay: 300,
         }
       };
 
+      const container = document.getElementById("net");
       const network = new vis.Network(container, networkData, options);
-      network.on("click", (p) => {
+
+      network.on("click", p => {
         const targetId = p?.nodes?.[0];
-        if (!targetId || String(targetId).startsWith("unknown:")) return;
+        if (!targetId || String(targetId).startsWith("union:")) return;
         const next = new URLSearchParams(location.search);
         next.set("koalaId", targetId);
-        next.set("depth", depth);
-        next.set("includeChildren", includeChildren);
         location.href = `./pedigree.html?${next.toString()}`;
       });
 
       function updateLabels() {
-        const next = rawNodes.map(n => ({
-          id: n.id,
-          label: formatLabel(n)
-        }));
-        networkData.nodes.update(next);
+        networkData.nodes.update(rawNodes.map(n => ({ id: n.id, label: formatLabel(n) })));
       }
 
       toggleSex.addEventListener("change", updateLabels);
       toggleBirth.addEventListener("change", updateLabels);
-      centerRootBtn.addEventListener("click", () => {
+      document.getElementById("centerRoot").addEventListener("click", () => {
         if (rootId) network.focus(rootId, { scale: 1.1, animation: true });
       });
-      fitAllBtn.addEventListener("click", () => network.fit({ animation: true }));
-      updateLabels();
-    }
-
-    function placeholderPhoto(label) {
-      const text = (label || "Koala").slice(0, 6);
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240">
-          <defs>
-            <radialGradient id="g" cx="50%" cy="35%" r="70%">
-              <stop offset="0" stop-color="#fff7ea"/>
-              <stop offset="1" stop-color="#e6d6c1"/>
-            </radialGradient>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#g)"/>
-          <circle cx="70" cy="90" r="40" fill="#cdb89b"/>
-          <circle cx="170" cy="90" r="40" fill="#cdb89b"/>
-          <circle cx="120" cy="120" r="55" fill="#d9c6ad"/>
-          <circle cx="120" cy="140" r="18" fill="#b59c7b"/>
-          <circle cx="105" cy="112" r="6" fill="#4a4036"/>
-          <circle cx="135" cy="112" r="6" fill="#4a4036"/>
-          <text x="50%" y="210" text-anchor="middle" font-size="22" fill="#7a4b36" font-family="Shippori Mincho, Noto Serif JP, serif">${text}</text>
-        </svg>
-      `;
-      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-    }
-
-    function formatLabel(n) {
-      const showSex = document.getElementById("toggleSex")?.checked ?? true;
-      const showBirth = document.getElementById("toggleBirth")?.checked ?? true;
-      const lines = [n.name];
-      if (showSex) lines.push(n.sex || "U");
-      if (showBirth && n.birthDate) lines.push(n.birthDate);
-      return lines.join("\n").trim();
+      document.getElementById("fitAll").addEventListener("click", () => network.fit({ animation: true }));
     }
   </script>
 </body>

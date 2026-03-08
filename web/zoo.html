@@ -7,70 +7,147 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --ink: #22201c;
-      --ink-soft: #61594e;
-      --paper: #f8f4ec;
-      --paper-deep: #f0e7d8;
-      --line: #d5c8b6;
-      --accent: #8b4d2b;
-      --accent-soft: #f6e6d7;
+      --ink: #162818;
+      --ink-soft: #3f6047;
+      --paper: #eaf4ec;
+      --paper-deep: #d8ecdb;
+      --line: #99c4a2;
+      --accent: #2a6e37;
+      --accent-soft: #c6e8cb;
+      --euca: #7ab89a;
+      --bark: #8c6a42;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+      font-family: "M PLUS Rounded 1c", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(1200px 520px at 10% -10%, #fff8ea 0%, transparent 62%),
-        radial-gradient(900px 540px at 88% -20%, #fef2e2 0%, transparent 55%),
-        linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+        radial-gradient(1400px 700px at 20% -15%, #d4edda 0%, transparent 55%),
+        radial-gradient(1000px 600px at 85% 110%, #c8e8cd 0%, transparent 50%),
+        radial-gradient(600px 400px at 50% 50%, #e6f4e8 0%, transparent 70%),
+        linear-gradient(160deg, #dff0e2 0%, #c8e0cc 50%, #d6ecda 100%);
     }
 
     header {
-      padding: 16px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,0.62);
-      backdrop-filter: blur(6px);
+      border-bottom: 2px solid var(--accent);
+      background: rgba(224, 242, 226, 0.94);
+      backdrop-filter: blur(8px);
       position: sticky;
       top: 0;
       z-index: 10;
     }
 
-    .title {
-      font-family: "Shippori Mincho", serif;
-      font-size: clamp(22px, 3vw, 30px);
-      letter-spacing: 0.6px;
-      margin: 0;
-      line-height: 1.2;
+    .header-stripe {
+      height: 5px;
+      background: linear-gradient(90deg, #1e5c2a 0%, #3a8c4a 40%, #5eb870 70%, #3a8c4a 100%);
     }
 
-    .meta {
-      margin-top: 6px;
-      font-size: 13px;
-      color: var(--ink-soft);
-    }
-
-    .stats {
-      margin-top: 10px;
+    .header-inner {
+      padding: 10px 16px 12px;
       display: flex;
-      gap: 8px;
+      align-items: flex-start;
+      gap: 16px;
+      justify-content: space-between;
       flex-wrap: wrap;
     }
 
-    .stat {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 4px 10px;
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent);
+      border-left: 4px solid var(--accent);
+      padding-left: 7px;
+      font-family: "M PLUS Rounded 1c", sans-serif;
+    }
+
+    .title {
+      font-family: "M PLUS Rounded 1c", sans-serif;
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin: 0;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    .header-nav {
       font-size: 12px;
       color: var(--ink-soft);
-      background: rgba(255,255,255,0.75);
-      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .header-nav a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .meta {
+      font-size: 11px;
+      color: var(--ink-soft);
+      font-style: italic;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.55);
+    }
+
+    .stat {
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 700;
+      padding: 5px 12px;
+      text-align: center;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .stat:last-child { border-right: none; }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: var(--ink-soft);
+      font-family: "M PLUS Rounded 1c", sans-serif;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      font-family: "M PLUS Rounded 1c", sans-serif;
     }
 
     main {
@@ -85,7 +162,7 @@
       gap: 8px;
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: rgba(255,255,255,0.68);
+      background: rgba(220, 242, 224, 0.72);
       padding: 10px;
     }
 
@@ -102,7 +179,7 @@
       border: 1px solid var(--line);
       border-radius: 10px;
       padding: 8px 10px;
-      background: #fffdf9;
+      background: rgba(255,255,255,0.75);
       color: var(--ink);
       font-size: 13px;
       font-family: inherit;
@@ -111,18 +188,21 @@
     .btn {
       cursor: pointer;
       font-weight: 700;
+      background: linear-gradient(180deg, #e8f7eb 0%, #d4edda 100%);
       transition: transform 120ms ease, box-shadow 120ms ease;
     }
 
     .btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(87, 52, 29, 0.14);
+      box-shadow: 0 4px 12px rgba(42, 110, 55, 0.18);
     }
 
     .count {
       font-size: 12px;
       color: var(--ink-soft);
       font-weight: 600;
+      display: flex;
+      align-items: center;
     }
 
     .album {
@@ -133,11 +213,11 @@
     }
 
     .card {
-      background: #fffefb;
+      background: rgba(240, 252, 243, 0.92);
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 10px;
-      box-shadow: 0 10px 24px rgba(82, 52, 28, 0.10);
+      box-shadow: 0 8px 20px rgba(22, 60, 30, 0.12);
       cursor: pointer;
       transform: translateY(6px);
       opacity: 0;
@@ -152,7 +232,8 @@
     }
 
     .card:hover {
-      border-color: #b89c7d;
+      border-color: var(--euca);
+      box-shadow: 0 10px 24px rgba(22, 60, 30, 0.18);
     }
 
     .photo-wrap {
@@ -163,37 +244,45 @@
       width: 100%;
       aspect-ratio: 4 / 5;
       border-radius: 10px;
-      border: 1px solid #d6c7b5;
-      background: #efe3d0;
+      border: 1px solid var(--line);
+      background: #c8dece;
       display: block;
       object-fit: cover;
-      filter: sepia(0.14) saturate(0.94);
     }
 
     .sex-pill {
       position: absolute;
       top: 8px;
       right: 8px;
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid #dbcab6;
-      background: rgba(255,255,255,0.85);
-      color: var(--ink-soft);
+      font-size: 14px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.88);
+      color: var(--ink);
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
+    .sex-pill.female { color: #b84c7a; border-color: #f0b8d0; background: rgba(255,240,248,0.92); }
+    .sex-pill.male   { color: #2e6ab0; border-color: #a8caf0; background: rgba(240,248,255,0.92); }
 
     .name {
       margin-top: 8px;
-      font-family: "Shippori Mincho", serif;
-      font-size: 18px;
+      font-family: "M PLUS Rounded 1c", sans-serif;
+      font-size: 17px;
       font-weight: 700;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.2px;
+      color: var(--ink);
     }
 
     .sub {
       color: var(--ink-soft);
       font-size: 12px;
+      font-weight: 400;
       margin-top: 3px;
       display: grid;
       gap: 3px;
@@ -202,12 +291,19 @@
     .status {
       margin-top: 8px;
       font-size: 11px;
-      padding: 3px 8px;
+      font-weight: 600;
+      padding: 3px 10px;
       border-radius: 999px;
-      border: 1px solid #e3d4c3;
-      background: #fff7ee;
-      color: #73563f;
+      border: 1px solid #b8d8be;
+      background: rgba(200, 232, 208, 0.5);
+      color: var(--ink-soft);
       display: inline-block;
+    }
+
+    .status.deceased {
+      border-color: #e8b8a0;
+      background: rgba(255, 220, 196, 0.6);
+      color: #9e4a22;
     }
 
     .empty {
@@ -219,14 +315,14 @@
       border: 1px dashed var(--line);
       border-radius: 10px;
       padding: 12px;
-      background: rgba(255,255,255,0.62);
+      background: rgba(220, 242, 224, 0.5);
     }
     .empty.show { display: block; }
 
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.42);
+      background: rgba(10, 30, 14, 0.52);
       display: none;
       align-items: center;
       justify-content: center;
@@ -237,12 +333,14 @@
     .modal.open { display: flex; }
 
     .modal-card {
-      width: min(560px, 95vw);
-      background: #fffdf8;
+      width: min(380px, 95vw);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(236, 250, 238, 0.98);
       border: 1px solid var(--line);
       border-radius: 16px;
-      box-shadow: 0 24px 46px rgba(0,0,0,0.24);
-      padding: 14px;
+      box-shadow: 0 24px 46px rgba(10, 40, 18, 0.32);
+      padding: 16px;
     }
 
     .modal-header {
@@ -253,14 +351,15 @@
     }
 
     .modal-title {
-      font-family: "Shippori Mincho", serif;
+      font-family: "M PLUS Rounded 1c", sans-serif;
       font-size: 20px;
       font-weight: 700;
+      color: var(--ink);
     }
 
     .close-btn {
       border: 1px solid var(--line);
-      background: #fff6ea;
+      background: rgba(255,255,255,0.7);
       border-radius: 999px;
       padding: 5px 10px;
       font-size: 12px;
@@ -269,33 +368,40 @@
       font-family: inherit;
     }
 
-    .modal-body {
-      display: grid;
-      grid-template-columns: 150px 1fr;
-      gap: 12px;
-      margin-top: 10px;
-      align-items: start;
-    }
-
     .modal-photo {
       width: 100%;
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 3 / 4;
       border-radius: 10px;
-      border: 1px solid #d6c7b5;
+      border: 1px solid var(--line);
       object-fit: cover;
-      background: #efe3d0;
+      background: #c8dece;
+      margin-top: 12px;
+      display: block;
     }
 
     .modal-info {
       font-size: 13px;
       color: var(--ink-soft);
       display: grid;
-      gap: 7px;
-      line-height: 1.45;
+      gap: 8px;
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+
+    .modal-info-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .modal-info-label {
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 52px;
+      flex-shrink: 0;
     }
 
     .modal-actions {
-      margin-top: 12px;
+      margin-top: 14px;
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
@@ -305,10 +411,14 @@
       font-size: 12px;
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid #d7c7b3;
+      border: 1px solid var(--line);
       color: var(--ink-soft);
-      background: #fff6ea;
+      background: rgba(200, 232, 208, 0.6);
       text-decoration: none;
+    }
+
+    .action:hover {
+      background: rgba(180, 220, 188, 0.8);
     }
 
     a { color: inherit; }
@@ -320,25 +430,45 @@
     }
 
     @media (max-width: 640px) {
-      header { padding: 12px; }
+      .header-inner { flex-direction: column; gap: 10px; }
+      .header-right { align-items: flex-start; }
+      .stats { grid-template-columns: repeat(4, 1fr); }
       main { padding: 12px 12px 24px; }
       .toolbar-row { grid-template-columns: 1fr; }
       .album { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-      .modal-body { grid-template-columns: 1fr; }
-      .modal-photo { max-width: 220px; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1 id="zooTitle" class="title">動物園</h1>
-    <div class="meta" id="zooMeta">コアラ一覧（写真クリックで詳細 / カードクリックで家系図）</div>
-    <div class="meta"><a href="./">← 地図へ戻る</a></div>
-    <div class="stats">
-      <span id="statAlive" class="stat">現存: -</span>
-      <span id="statFemale" class="stat">メス: -</span>
-      <span id="statMale" class="stat">オス: -</span>
-      <span id="statUnknown" class="stat">不明: -</span>
+    <div class="header-stripe"></div>
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="header-label">コアラ図鑑</div>
+        <h1 id="zooTitle" class="title">動物園</h1>
+        <div class="header-nav"><a href="./">← 地図へ戻る</a></div>
+      </div>
+      <div class="header-right">
+        <div class="meta" id="zooMeta">コアラ一覧</div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">現存</span>
+            <span class="stat-value" id="statAlive">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">♀ メス</span>
+            <span class="stat-value" id="statFemale">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">♂ オス</span>
+            <span class="stat-value" id="statMale">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">不明</span>
+            <span class="stat-value" id="statUnknown">-</span>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -354,7 +484,7 @@
         </select>
         <select id="statusFilter">
           <option value="">状態: すべて</option>
-          <option value="alive">状態: 現存</option>
+          <option value="alive" selected>状態: 現存</option>
           <option value="deceased">状態: 死亡</option>
           <option value="unknown">状態: 不明</option>
         </select>
@@ -380,16 +510,14 @@
         <div id="modalTitle" class="modal-title">コアラ詳細</div>
         <button id="modalClose" class="close-btn" type="button">閉じる</button>
       </div>
-      <div class="modal-body">
-        <img id="modalPhoto" class="modal-photo" alt="">
-        <div class="modal-info">
-          <div id="modalName"></div>
-          <div id="modalSex"></div>
-          <div id="modalBirth"></div>
-          <div id="modalStatus"></div>
-          <div id="modalParents"></div>
-          <div id="modalZoo"></div>
-        </div>
+      <img id="modalPhoto" class="modal-photo" alt="">
+      <div class="modal-info">
+        <div class="modal-info-row"><span class="modal-info-label">名前</span><span id="modalName"></span></div>
+        <div class="modal-info-row"><span class="modal-info-label">性別</span><span id="modalSex"></span></div>
+        <div class="modal-info-row"><span class="modal-info-label">誕生日</span><span id="modalBirth"></span></div>
+        <div class="modal-info-row" id="modalStatusRow"><span class="modal-info-label">状態</span><span id="modalStatus"></span></div>
+        <div class="modal-info-row"><span class="modal-info-label">母</span><span id="modalMother"></span></div>
+        <div class="modal-info-row"><span class="modal-info-label">父</span><span id="modalFather"></span></div>
       </div>
       <div class="modal-actions">
         <a id="modalPedigree" class="action" href="#">家系図へ →</a>
@@ -416,7 +544,7 @@
 
       const titleText = zoo?.name || `Zoo: ${zooId}`;
       document.getElementById("zooTitle").textContent = titleText;
-      document.getElementById("zooMeta").textContent = zoo?.pref || zoo?.city ? `${zoo.pref || ""} ${zoo.city || ""} の個体一覧` : "コアラ一覧（写真クリックで詳細 / カードクリックで家系図）";
+      document.getElementById("zooMeta").textContent = zoo?.pref || zoo?.city ? `${zoo.pref || ""} ${zoo.city || ""} のコアラ一覧` : "コアラ一覧（写真クリックで詳細 / カードクリックで家系図）";
 
       const countEl = document.getElementById("count");
       const cardsEl = document.getElementById("cards");
@@ -443,21 +571,26 @@
           card.style.animationDelay = `${Math.min(i * 18, 180)}ms`;
 
           const sex = k.sex || "U";
+          const sexMark = sex === "F" ? "♀" : sex === "M" ? "♂" : "?";
+          const sexClass = sex === "F" ? "female" : sex === "M" ? "male" : "";
           const bd = k.birthDate || "-";
           const name = k.name || "(no name)";
           const photoUrl = getPhotoUrl(k);
+          const status = k.status || "unknown";
+          const statusHtml = status !== "alive"
+            ? `<div class="status${status === "deceased" ? " deceased" : ""}">${status === "deceased" ? "死亡" : "不明"}</div>`
+            : "";
 
           card.innerHTML = `
             <div class="photo-wrap">
               <img class="photo" src="${photoUrl}" alt="${escapeHtml(name)}">
-              <span class="sex-pill">${escapeHtml(sex)}</span>
+              <span class="sex-pill${sexClass ? ` ${sexClass}` : ""}">${sexMark}</span>
             </div>
             <div class="name">${escapeHtml(name)}</div>
             <div class="sub">
-              <div>誕生日: ${escapeHtml(bd)}</div>
-              <div>ID: ${escapeHtml(k.id || "-")}</div>
+              <div>${escapeHtml(bd)}</div>
             </div>
-            <div class="status">状態: ${escapeHtml(k.status || "unknown")}</div>
+            ${statusHtml}
           `;
 
           const photoEl = card.querySelector(".photo");
@@ -502,13 +635,12 @@
       clearFilterBtn.addEventListener("click", () => {
         qInput.value = "";
         sexFilter.value = "";
-        statusFilter.value = "";
+        statusFilter.value = "alive";
         sortOrder.value = "name";
         applyFilters();
         qInput.focus();
       });
 
-      countEl.textContent = `${allKoalas.length} 頭`;
       applyFilters();
 
       modalClose.addEventListener("click", () => closeModal(modalEl));
@@ -553,24 +685,30 @@
       const male = list.filter(k => (k.sex || "U") === "M").length;
       const unknown = list.filter(k => (k.sex || "U") === "U").length;
 
-      document.getElementById("statAlive").textContent = `現存: ${alive}`;
-      document.getElementById("statFemale").textContent = `メス: ${female}`;
-      document.getElementById("statMale").textContent = `オス: ${male}`;
-      document.getElementById("statUnknown").textContent = `不明: ${unknown}`;
+      document.getElementById("statAlive").textContent = alive;
+      document.getElementById("statFemale").textContent = female;
+      document.getElementById("statMale").textContent = male;
+      document.getElementById("statUnknown").textContent = unknown;
     }
 
     function openModal(k, zooName, modalEl, koalaById) {
+      const sexMark = k.sex === "F" ? "♀ メス" : k.sex === "M" ? "♂ オス" : "不明";
       document.getElementById("modalTitle").textContent = k.name || "コアラ詳細";
       document.getElementById("modalPhoto").src = getPhotoUrl(k);
       document.getElementById("modalPhoto").alt = k.name || "(no name)";
-      document.getElementById("modalName").textContent = `名前: ${k.name || "(no name)"}`;
-      document.getElementById("modalSex").textContent = `性別: ${k.sex || "U"}`;
-      document.getElementById("modalBirth").textContent = `誕生日: ${k.birthDate || "-"}`;
-      document.getElementById("modalStatus").textContent = `状態: ${k.status || "-"}`;
-      const motherHtml = renderParentLink(k.motherId, koalaById);
-      const fatherHtml = renderParentLink(k.fatherId, koalaById);
-      document.getElementById("modalParents").innerHTML = `両親: ${motherHtml} / ${fatherHtml}`;
-      document.getElementById("modalZoo").textContent = `動物園: ${zooName}`;
+      document.getElementById("modalName").textContent = k.name || "(no name)";
+      document.getElementById("modalSex").textContent = sexMark;
+      document.getElementById("modalBirth").textContent = k.birthDate || "-";
+      const statusEl = document.getElementById("modalStatus");
+      const statusRowEl = document.getElementById("modalStatusRow");
+      if (k.status && k.status !== "alive") {
+        statusEl.textContent = k.status === "deceased" ? "死亡" : "不明";
+        statusRowEl.style.display = "";
+      } else {
+        statusRowEl.style.display = "none";
+      }
+      document.getElementById("modalMother").innerHTML = renderParentLink(k.motherId, koalaById);
+      document.getElementById("modalFather").innerHTML = renderParentLink(k.fatherId, koalaById);
       document.getElementById("modalPedigree").href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
       modalEl.classList.add("open");
       modalEl.setAttribute("aria-hidden", "false");

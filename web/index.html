@@ -91,18 +91,23 @@
     }
 
     .stat {
-      border: 1px solid #a9ccb7;
-      border-radius: 999px;
-      padding: 6px 11px;
-      background: rgba(255, 255, 255, 0.92);
       font-size: 13px;
       color: var(--ink-soft);
-      font-weight: 800;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
     }
 
     .stat strong {
       color: var(--ink);
-      margin-right: 4px;
+      font-weight: 800;
+    }
+
+    .stat + .stat {
+      padding-left: 12px;
+      border-left: 1px solid var(--line);
     }
 
     #app {
@@ -229,31 +234,41 @@
     .row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
     .title { font-size: 17px; font-weight: 800; letter-spacing: 0.1px; }
     .zoo-link {
-      color: inherit;
-      text-decoration: underline;
-      text-decoration-color: #8db9a2;
-      text-underline-offset: 2px;
-    }
-    .zoo-link:hover { color: #2e6b4a; }
-
-    .badge {
-      font-size: 12px;
-      font-weight: 800;
-      border: 1px solid #afd4bd;
-      border-radius: 999px;
-      padding: 4px 9px;
-      color: #276947;
-      background: #ebfaef;
-      white-space: nowrap;
-    }
-    .badge-link {
+      display: inline-block;
+      color: var(--ink);
       text-decoration: none;
-      cursor: pointer;
+      background: linear-gradient(180deg, #f5fff8 0%, #e7f7ed 100%);
+      border: 1px solid #abd1bb;
+      border-radius: 10px;
+      padding: 4px 10px;
+      font-size: 15px;
+      font-weight: 800;
+      transition: box-shadow 120ms ease, transform 120ms ease;
     }
-    .badge-link:hover {
-      color: #1f5f3f;
-      background: #def5e6;
-      border-color: #94c8ab;
+    .zoo-link:hover {
+      color: #1e5c3d;
+      border-color: #7ab898;
+      box-shadow: 0 4px 12px rgba(58, 104, 80, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .official-link {
+      margin-top: 3px;
+    }
+
+    .site-link {
+      font-size: 12px;
+      color: var(--moss);
+      text-decoration: none;
+      border-bottom: 1px solid #9dc9b0;
+    }
+    .site-link:hover { color: #1f5f3f; border-bottom-color: #1f5f3f; }
+
+    .koala-count {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      white-space: nowrap;
     }
 
     .sub { color: var(--ink-soft); margin-top: 6px; font-size: 14px; }
@@ -564,13 +579,10 @@
 
       el.innerHTML = `
         <div class="row">
-          <div class="title">${
-            url
-              ? `<a class="zoo-link" href="${escapeAttr(url)}" target="_blank" rel="noreferrer">${escapeHtml(z.name || "(no name)")}</a>`
-              : `${escapeHtml(z.name || "(no name)")}`
-          }</div>
-          <a class="badge badge-link" href="./zoo.html?zooId=${encodeURIComponent(z.id)}">コアラ ${escapeHtml(koalaBadge)}</a>
+          <div class="title"><a class="zoo-link" href="./zoo.html?zooId=${encodeURIComponent(z.id)}">${escapeHtml(z.name || "(no name)")}</a></div>
+          <span class="koala-count">コアラ ${escapeHtml(koalaBadge)}</span>
         </div>
+        ${url ? `<div class="official-link"><a class="site-link" href="${escapeAttr(url)}" target="_blank" rel="noreferrer">公式サイト →</a></div>` : ""}
         <div class="sub">${escapeHtml(place)}</div>
         <div class="small">${displayNames ? `在籍: ${escapeHtml(displayNames)}${escapeHtml(more)}` : "在籍: 情報なし"}</div>
       `;
