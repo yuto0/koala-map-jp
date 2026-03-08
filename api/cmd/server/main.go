@@ -42,11 +42,13 @@ type Koala struct {
 }
 
 type PedigreeNode struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Sex       string `json:"sex"`
-	BirthDate string `json:"birthDate"`
-	Note      string `json:"note,omitempty"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Sex        string `json:"sex"`
+	BirthDate  string `json:"birthDate"`
+	Status     string `json:"status"`
+	HasParents bool   `json:"hasParents"`
+	Note       string `json:"note,omitempty"`
 }
 
 type PedigreeEdge struct {
@@ -340,47 +342,38 @@ func buildPedigree(ctx context.Context, client *firestore.Client, rootID string,
 			return PedigreeResponse{}, err
 		}
 		if !ok {
-			// データが無い（公開されてない等）→ unknownノードで置き換え
 			nodesByID[cur.id] = PedigreeNode{
-				ID:   cur.id,
-				Name: "（不明）",
-				Sex:  "U",
-				Note: "record not found",
+				ID:     cur.id,
+				Name:   "（不明）",
+				Sex:    "U",
+				Status: "unknown",
+				Note:   "record not found",
 			}
 			continue
 		}
 
+		motherID := asString(m["motherId"])
+		fatherID := asString(m["fatherId"])
+
 		// 自分ノード
 		nodesByID[cur.id] = PedigreeNode{
-			ID:        cur.id,
-			Name:      asString(m["name"]),
-			Sex:       asString(m["sex"]),
-			BirthDate: asString(m["birthDate"]),
+			ID:         cur.id,
+			Name:       asString(m["name"]),
+			Sex:        asString(m["sex"]),
+			BirthDate:  asString(m["birthDate"]),
+			Status:     asString(m["status"]),
+			HasParents: cur.depth == 0 && (motherID != "" || fatherID != ""),
 		}
 
-		// 親を辿る
+		// 親を辿る（不明ノードは作らず、HasParentsフラグで表現）
 		if cur.depth > 0 {
-			motherID := asString(m["motherId"])
-			fatherID := asString(m["fatherId"])
-
-			// mother edge
 			if motherID != "" {
 				edges = append(edges, PedigreeEdge{From: motherID, To: cur.id, Type: "mother"})
 				queue = append(queue, item{id: motherID, depth: cur.depth - 1})
-			} else {
-				unk := "unknown:" + cur.id + ":mother"
-				nodesByID[unk] = PedigreeNode{ID: unk, Name: "（母 不明）", Sex: "U"}
-				edges = append(edges, PedigreeEdge{From: unk, To: cur.id, Type: "mother"})
 			}
-
-			// father edge
 			if fatherID != "" {
 				edges = append(edges, PedigreeEdge{From: fatherID, To: cur.id, Type: "father"})
 				queue = append(queue, item{id: fatherID, depth: cur.depth - 1})
-			} else {
-				unk := "unknown:" + cur.id + ":father"
-				nodesByID[unk] = PedigreeNode{ID: unk, Name: "（父 不明）", Sex: "U"}
-				edges = append(edges, PedigreeEdge{From: unk, To: cur.id, Type: "father"})
 			}
 		}
 	}
@@ -414,18 +407,52 @@ func addChildrenOfRoot(ctx context.Context, client *firestore.Client, rootID str
 		return nil
 	}
 
-	addChild := func(d *firestore.DocumentSnapshot, relation string) {
+	// 子どもとそのパートナー（もう一方の親）をグラフに追加する
+	addChildAndPartner := func(d *firestore.DocumentSnapshot, childEdgeType, partnerField, partnerEdgeType string) error {
 		m := d.Data()
-		id := d.Ref.ID
-		if _, ok := nodesByID[id]; !ok {
-			nodesByID[id] = PedigreeNode{
-				ID:        id,
-				Name:      asString(m["name"]),
-				Sex:       asString(m["sex"]),
-				BirthDate: asString(m["birthDate"]),
+		childID := d.Ref.ID
+		motherID := asString(m["motherId"])
+		fatherID := asString(m["fatherId"])
+
+		if _, ok := nodesByID[childID]; !ok {
+			nodesByID[childID] = PedigreeNode{
+				ID:         childID,
+				Name:       asString(m["name"]),
+				Sex:        asString(m["sex"]),
+				BirthDate:  asString(m["birthDate"]),
+				Status:     asString(m["status"]),
+				HasParents: motherID != "" || fatherID != "",
 			}
 		}
-		*edges = append(*edges, PedigreeEdge{From: rootID, To: id, Type: relation})
+		*edges = append(*edges, PedigreeEdge{From: rootID, To: childID, Type: childEdgeType})
+
+		// パートナー（ルートでない方の親）を追加
+		partnerID := asString(m[partnerField])
+		if partnerID == "" || partnerID == rootID {
+			return nil
+		}
+		if _, ok := nodesByID[partnerID]; !ok {
+			pd, err := client.Collection("koalas").Doc(partnerID).Get(ctx)
+			if err != nil {
+				if isNotFoundErr(err) {
+					return nil
+				}
+				return err
+			}
+			pm := pd.Data()
+			pmID := asString(pm["motherId"])
+			pfID := asString(pm["fatherId"])
+			nodesByID[partnerID] = PedigreeNode{
+				ID:         partnerID,
+				Name:       asString(pm["name"]),
+				Sex:        asString(pm["sex"]),
+				BirthDate:  asString(pm["birthDate"]),
+				Status:     asString(pm["status"]),
+				HasParents: pmID != "" || pfID != "",
+			}
+		}
+		*edges = append(*edges, PedigreeEdge{From: partnerID, To: childID, Type: partnerEdgeType})
+		return nil
 	}
 
 	motherDocs, err := client.Collection("koalas").Where("motherId", "==", rootID).Documents(ctx).GetAll()
@@ -433,7 +460,9 @@ func addChildrenOfRoot(ctx context.Context, client *firestore.Client, rootID str
 		return err
 	}
 	for _, d := range motherDocs {
-		addChild(d, "mother")
+		if err := addChildAndPartner(d, "mother", "fatherId", "father"); err != nil {
+			return err
+		}
 	}
 
 	fatherDocs, err := client.Collection("koalas").Where("fatherId", "==", rootID).Documents(ctx).GetAll()
@@ -441,7 +470,9 @@ func addChildrenOfRoot(ctx context.Context, client *firestore.Client, rootID str
 		return err
 	}
 	for _, d := range fatherDocs {
-		addChild(d, "father")
+		if err := addChildAndPartner(d, "father", "motherId", "mother"); err != nil {
+			return err
+		}
 	}
 	return nil
 }
