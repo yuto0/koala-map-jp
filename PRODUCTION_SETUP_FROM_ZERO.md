@@ -156,5 +156,65 @@ gcloud run services list --region asia-northeast1 --project koala-map-jp
 3. Firestore 使用量アラート作成
 4. 本番用 Runtime Service Account を専用化
 
+## 11. 無料枠運用向けの具体設定（重要）
+この構成では「絶対0円保証」はできない。無料枠超過時に課金されるため、以下で上振れを抑制する。
+
+### 11.1 Cloud Run を低コスト設定に固定
+`min-instances=0` でアイドル課金を抑え、`max-instances` を小さくして上限を絞る。
+
+```bash
+gcloud run services update koala-map-jp-api \
+  --project koala-map-jp \
+  --region asia-northeast1 \
+  --min-instances=0 \
+  --max-instances=2 \
+  --cpu=1 \
+  --memory=512Mi \
+  --concurrency=80 \
+  --timeout=30s
+```
+
+テスト環境も同様:
+```bash
+gcloud run services update koala-map-jp-api-test \
+  --project koala-map-jp-test \
+  --region asia-northeast1 \
+  --min-instances=0 \
+  --max-instances=1 \
+  --cpu=1 \
+  --memory=512Mi \
+  --concurrency=80 \
+  --timeout=30s
+```
+
+### 11.2 予算アラートを設定
+まず Billing Account ID を取得:
+```bash
+gcloud billing accounts list
+```
+
+次に少額アラートを作成（例: 300円相当/月）。`BILLING_ACCOUNT_ID` と通知メールを置換。
+```bash
+gcloud billing budgets create \
+  --billing-account=BILLING_ACCOUNT_ID \
+  --display-name="koala-map-jp-monthly-budget" \
+  --budget-amount=300JPY \
+  --calendar-period=month \
+  --threshold-rule=percent=0.5 \
+  --threshold-rule=percent=0.9 \
+  --threshold-rule=percent=1.0
+```
+
+### 11.3 Firestore 読み取り削減
+1. 一覧APIは必要なフィールドだけ返す
+2. 頻繁に変わらないレスポンスに `Cache-Control` を付ける
+3. クライアント側の連打取得を抑制（既にキャッシュ実装あり）
+
+### 11.4 デプロイ後の必須確認
+```bash
+curl -i https://koala-map-jp.web.app/api/health
+gcloud run services describe koala-map-jp-api --region asia-northeast1 --project koala-map-jp --format='value(spec.template.metadata.annotations)'
+```
+
 ---
 この手順は「初回セットアップ」に特化。日常の更新は `DEVELOPMENT_WORKFLOW.md` と `./infra/deploy-test.sh` / `./infra/deploy-prod.sh` を利用する。
