@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ページが見つかりません | コアラマップ JP</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='7' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='25' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='7' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='25' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='16' cy='18' r='12' fill='%239e8a6e'/%3E%3Cellipse cx='16' cy='20' rx='5' ry='4' fill='%235a3d2b'/%3E%3Ccircle cx='11' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='21' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='10.5' cy='14.5' r='1' fill='white'/%3E%3Ccircle cx='20.5' cy='14.5' r='1' fill='white'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a2e24;
+      --ink-soft: #4a6358;
+      --paper: #faf7f2;
+      --line: #c8bfb0;
+      --accent: #b85c1a;
+      --green: #2d6a4f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "M PLUS Rounded 1c", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 600px at 20% -10%, #f5ede0 0%, transparent 60%),
+        radial-gradient(700px 500px at 80% 110%, #ecdcca 0%, transparent 55%),
+        linear-gradient(160deg, #fdfaf5 0%, #f0ebe1 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      border-bottom: 1px solid var(--line);
+      background: rgba(250, 247, 242, 0.94);
+      backdrop-filter: blur(8px);
+    }
+
+    .header-stripe {
+      height: 5px;
+      background: linear-gradient(90deg, #2d6a4f 0%, #4a9a6e 35%, #c87830 65%, #b85c1a 100%);
+    }
+
+    .header-body {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .header-body a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(90, 61, 43, 0.1);
+      padding: 40px 36px 36px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .koala-svg {
+      display: block;
+      margin: 0 auto 24px;
+    }
+
+    .code {
+      font-size: 72px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -2px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 8px 0 0;
+      color: var(--ink);
+    }
+
+    .desc {
+      font-size: 14px;
+      color: var(--ink-soft);
+      margin: 12px 0 28px;
+      line-height: 1.7;
+    }
+
+    .home-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #2d6a4f 0%, #4a9a6e 50%, #b85c1a 100%);
+      color: white;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 12px 28px;
+      border-radius: 999px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      box-shadow: 0 4px 16px rgba(184, 92, 26, 0.3);
+    }
+
+    .home-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(184, 92, 26, 0.35);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-stripe"></div>
+    <div class="header-body">
+      <a href="./">
+        <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="7" cy="10" r="6" fill="#8b7355"/>
+          <circle cx="25" cy="10" r="6" fill="#8b7355"/>
+          <circle cx="7" cy="10" r="3.5" fill="#c4a882"/>
+          <circle cx="25" cy="10" r="3.5" fill="#c4a882"/>
+          <circle cx="16" cy="18" r="12" fill="#9e8a6e"/>
+          <ellipse cx="16" cy="20" rx="5" ry="4" fill="#5a3d2b"/>
+          <circle cx="11" cy="15" r="2.5" fill="#2d1e12"/>
+          <circle cx="21" cy="15" r="2.5" fill="#2d1e12"/>
+          <circle cx="10.5" cy="14.5" r="1" fill="white"/>
+          <circle cx="20.5" cy="14.5" r="1" fill="white"/>
+        </svg>
+        コアラマップ JP
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <svg class="koala-svg" width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <!-- ears -->
+        <circle cx="24" cy="38" r="22" fill="#c4a882"/>
+        <circle cx="96" cy="38" r="22" fill="#c4a882"/>
+        <circle cx="24" cy="38" r="13" fill="#e8d4b8"/>
+        <circle cx="96" cy="38" r="13" fill="#e8d4b8"/>
+        <!-- head -->
+        <circle cx="60" cy="68" r="42" fill="#d9c4ab"/>
+        <!-- snout -->
+        <ellipse cx="60" cy="76" rx="20" ry="16" fill="#c4a882"/>
+        <!-- nose -->
+        <ellipse cx="60" cy="70" rx="12" ry="9" fill="#5a3d2b"/>
+        <!-- eyes -->
+        <circle cx="44" cy="57" r="7" fill="#2d1e12"/>
+        <circle cx="76" cy="57" r="7" fill="#2d1e12"/>
+        <circle cx="41.5" cy="54.5" r="3" fill="white"/>
+        <circle cx="73.5" cy="54.5" r="3" fill="white"/>
+        <!-- sleeping zzz hints -->
+        <text x="88" y="28" font-size="14" fill="#b85c1a" font-family="M PLUS Rounded 1c, sans-serif" font-weight="800">z</text>
+        <text x="98" y="18" font-size="11" fill="#b85c1a" font-family="M PLUS Rounded 1c, sans-serif" font-weight="800">z</text>
+        <text x="106" y="10" font-size="9" fill="#b85c1a" font-family="M PLUS Rounded 1c, sans-serif" font-weight="800">z</text>
+      </svg>
+
+      <div class="code">404</div>
+      <div class="title">ページが見つかりません</div>
+      <p class="desc">
+        コアラはユーカリの木のどこかに<br>隠れているようです…<br>
+        URLを確認してもう一度お試しください。
+      </p>
+      <a class="home-btn" href="./">ホームへ戻る</a>
+    </div>
+  </main>
+</body>
+</html>

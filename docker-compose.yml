@@ -1,0 +1,71 @@
+services:
+  firestore:
+    build:
+      context: .
+      dockerfile: infra/docker/firestore/Dockerfile
+    container_name: koala-map-firestore
+    working_dir: /workspace
+    command:
+      - firebase
+      - emulators:start
+      - --only
+      - firestore
+      - --project
+      - koala-map-jp
+      - --config
+      - /workspace/firebase.json
+      - --import
+      - /workspace/.emulator-data
+      - --export-on-exit
+    ports:
+      - "8081:8081"
+      - "4000:4000"
+    volumes:
+      - ./:/workspace
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4000"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  seed:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: koala-map-seed
+    environment:
+      FIREBASE_PROJECT_ID: koala-map-jp
+      FIRESTORE_EMULATOR_HOST: firestore:8081
+    depends_on:
+      firestore:
+        condition: service_healthy
+    entrypoint: ["/app/seed"]
+    restart: "no"
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: koala-map-api
+    environment:
+      FIREBASE_PROJECT_ID: koala-map-jp
+      FIRESTORE_EMULATOR_HOST: firestore:8081
+      SERVE_STATIC: "false"
+      PORT: "8080"
+    depends_on:
+      firestore:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: koala-map-web
+    depends_on:
+      - api
+    ports:
+      - "8088:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./infra/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
