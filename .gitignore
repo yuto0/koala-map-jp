@@ -9,3 +9,6 @@ bin/
 *.log
 .firebase/
 .emulator-data/
+firebase-export-*/
+*.png
+!web/assets/
