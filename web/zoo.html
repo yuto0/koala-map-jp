@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zoo - Koala Map JP</title>
+  <title>コアラマップ JP</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='7' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='25' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='7' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='25' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='16' cy='18' r='12' fill='%239e8a6e'/%3E%3Cellipse cx='16' cy='20' rx='5' ry='4' fill='%235a3d2b'/%3E%3Ccircle cx='11' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='21' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='10.5' cy='14.5' r='1' fill='white'/%3E%3Ccircle cx='20.5' cy='14.5' r='1' fill='white'/%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,15 +12,15 @@
 
   <style>
     :root {
-      --ink: #162818;
-      --ink-soft: #3f6047;
-      --paper: #eaf4ec;
-      --paper-deep: #d8ecdb;
-      --line: #99c4a2;
-      --accent: #2a6e37;
-      --accent-soft: #c6e8cb;
-      --euca: #7ab89a;
-      --bark: #8c6a42;
+      --ink: #1a2e24;
+      --ink-soft: #4a6358;
+      --paper: #faf7f2;
+      --paper-deep: #f0ebe1;
+      --line: #c8bfb0;
+      --accent: #b85c1a;
+      --accent-soft: #f3dccb;
+      --green: #2d6a4f;
+      --green-soft: #d1e8dd;
     }
 
     * { box-sizing: border-box; }
@@ -29,15 +30,15 @@
       font-family: "M PLUS Rounded 1c", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(1400px 700px at 20% -15%, #d4edda 0%, transparent 55%),
-        radial-gradient(1000px 600px at 85% 110%, #c8e8cd 0%, transparent 50%),
-        radial-gradient(600px 400px at 50% 50%, #e6f4e8 0%, transparent 70%),
-        linear-gradient(160deg, #dff0e2 0%, #c8e0cc 50%, #d6ecda 100%);
+        radial-gradient(1400px 700px at 20% -15%, #f5ede0 0%, transparent 55%),
+        radial-gradient(1000px 600px at 85% 110%, #ecdcca 0%, transparent 50%),
+        radial-gradient(600px 400px at 50% 50%, #fdf3e8 0%, transparent 70%),
+        linear-gradient(160deg, #fdfaf5 0%, #f0ebe1 50%, #f5ede0 100%);
     }
 
     header {
-      border-bottom: 2px solid var(--accent);
-      background: rgba(224, 242, 226, 0.94);
+      border-bottom: 1px solid var(--line);
+      background: rgba(250, 247, 242, 0.94);
       backdrop-filter: blur(8px);
       position: sticky;
       top: 0;
@@ -46,7 +47,7 @@
 
     .header-stripe {
       height: 5px;
-      background: linear-gradient(90deg, #1e5c2a 0%, #3a8c4a 40%, #5eb870 70%, #3a8c4a 100%);
+      background: linear-gradient(90deg, #2d6a4f 0%, #4a9a6e 35%, #c87830 65%, #b85c1a 100%);
     }
 
     .header-inner {
@@ -68,7 +69,7 @@
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 3px;
-      color: var(--accent);
+      color: var(--green);
       border-left: 4px solid var(--accent);
       padding-left: 7px;
       font-family: "M PLUS Rounded 1c", sans-serif;
@@ -162,7 +163,7 @@
       gap: 8px;
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: rgba(220, 242, 224, 0.72);
+      background: rgba(243, 220, 203, 0.45);
       padding: 10px;
     }
 
@@ -188,13 +189,13 @@
     .btn {
       cursor: pointer;
       font-weight: 700;
-      background: linear-gradient(180deg, #e8f7eb 0%, #d4edda 100%);
+      background: linear-gradient(180deg, #fdf3e8 0%, #f3dccb 100%);
       transition: transform 120ms ease, box-shadow 120ms ease;
     }
 
     .btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(42, 110, 55, 0.18);
+      box-shadow: 0 4px 12px rgba(184, 92, 26, 0.18);
     }
 
     .count {
@@ -213,11 +214,11 @@
     }
 
     .card {
-      background: rgba(240, 252, 243, 0.92);
+      background: rgba(253, 249, 244, 0.95);
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 10px;
-      box-shadow: 0 8px 20px rgba(22, 60, 30, 0.12);
+      box-shadow: 0 8px 20px rgba(90, 61, 43, 0.1);
       cursor: pointer;
       transform: translateY(6px);
       opacity: 0;
@@ -232,8 +233,8 @@
     }
 
     .card:hover {
-      border-color: var(--euca);
-      box-shadow: 0 10px 24px rgba(22, 60, 30, 0.18);
+      border-color: #d4a882;
+      box-shadow: 0 10px 24px rgba(90, 61, 43, 0.16);
     }
 
     .photo-wrap {
@@ -245,7 +246,7 @@
       aspect-ratio: 4 / 5;
       border-radius: 10px;
       border: 1px solid var(--line);
-      background: #c8dece;
+      background: #d9c4ab;
       display: block;
       object-fit: cover;
     }
@@ -294,16 +295,16 @@
       font-weight: 600;
       padding: 3px 10px;
       border-radius: 999px;
-      border: 1px solid #b8d8be;
-      background: rgba(200, 232, 208, 0.5);
+      border: 1px solid var(--line);
+      background: rgba(209, 232, 221, 0.6);
       color: var(--ink-soft);
       display: inline-block;
     }
 
     .status.deceased {
-      border-color: #e8b8a0;
-      background: rgba(255, 220, 196, 0.6);
-      color: #9e4a22;
+      border-color: #d4a882;
+      background: rgba(243, 220, 203, 0.7);
+      color: var(--accent);
     }
 
     .empty {
@@ -336,10 +337,10 @@
       width: min(380px, 95vw);
       max-height: 90vh;
       overflow-y: auto;
-      background: rgba(236, 250, 238, 0.98);
+      background: rgba(253, 249, 244, 0.99);
       border: 1px solid var(--line);
       border-radius: 16px;
-      box-shadow: 0 24px 46px rgba(10, 40, 18, 0.32);
+      box-shadow: 0 24px 46px rgba(90, 61, 43, 0.28);
       padding: 16px;
     }
 
@@ -374,7 +375,7 @@
       border-radius: 10px;
       border: 1px solid var(--line);
       object-fit: cover;
-      background: #c8dece;
+      background: #d9c4ab;
       margin-top: 12px;
       display: block;
     }
@@ -395,7 +396,7 @@
 
     .modal-info-label {
       font-weight: 700;
-      color: var(--accent);
+      color: var(--green);
       min-width: 52px;
       flex-shrink: 0;
     }
@@ -411,14 +412,14 @@
       font-size: 12px;
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid var(--line);
-      color: var(--ink-soft);
-      background: rgba(200, 232, 208, 0.6);
+      border: 1px solid #d4a882;
+      color: var(--accent);
+      background: rgba(243, 220, 203, 0.7);
       text-decoration: none;
     }
 
     .action:hover {
-      background: rgba(180, 220, 188, 0.8);
+      background: rgba(243, 220, 203, 1);
     }
 
     a { color: inherit; }
@@ -444,8 +445,22 @@
     <div class="header-stripe"></div>
     <div class="header-inner">
       <div class="header-left">
-        <div class="header-label">コアラ図鑑</div>
-        <h1 id="zooTitle" class="title">動物園</h1>
+        <div class="header-label">コアラマップ JP</div>
+        <h1 id="zooTitle" class="title" style="display:flex;align-items:center;gap:8px">
+          <svg width="26" height="26" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0">
+            <circle cx="7" cy="10" r="6" fill="#8b7355"/>
+            <circle cx="25" cy="10" r="6" fill="#8b7355"/>
+            <circle cx="7" cy="10" r="3.5" fill="#c4a882"/>
+            <circle cx="25" cy="10" r="3.5" fill="#c4a882"/>
+            <circle cx="16" cy="18" r="12" fill="#9e8a6e"/>
+            <ellipse cx="16" cy="20" rx="5" ry="4" fill="#5a3d2b"/>
+            <circle cx="11" cy="15" r="2.5" fill="#2d1e12"/>
+            <circle cx="21" cy="15" r="2.5" fill="#2d1e12"/>
+            <circle cx="10.5" cy="14.5" r="1" fill="white"/>
+            <circle cx="20.5" cy="14.5" r="1" fill="white"/>
+          </svg>
+          動物園
+        </h1>
         <div class="header-nav"><a href="./">← 地図へ戻る</a></div>
       </div>
       <div class="header-right">
@@ -739,18 +754,20 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="400" height="500">
           <defs>
             <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#f7efe0"/>
-              <stop offset="1" stop-color="#e6d6c1"/>
+              <stop offset="0" stop-color="#fdf3e8"/>
+              <stop offset="1" stop-color="#ecdcca"/>
             </linearGradient>
           </defs>
           <rect width="100%" height="100%" fill="url(#g)"/>
-          <circle cx="120" cy="160" r="70" fill="#cdb89b"/>
-          <circle cx="280" cy="160" r="70" fill="#cdb89b"/>
+          <circle cx="120" cy="160" r="70" fill="#c4ae8e"/>
+          <circle cx="280" cy="160" r="70" fill="#c4ae8e"/>
           <circle cx="200" cy="230" r="90" fill="#d9c6ad"/>
-          <circle cx="200" cy="260" r="30" fill="#b59c7b"/>
-          <circle cx="170" cy="215" r="10" fill="#4a4036"/>
-          <circle cx="230" cy="215" r="10" fill="#4a4036"/>
-          <text x="50%" y="430" text-anchor="middle" font-size="32" fill="#7a4b36" font-family="Shippori Mincho, Noto Serif JP, serif">${text}</text>
+          <circle cx="200" cy="260" r="30" fill="#7a5c3c"/>
+          <circle cx="170" cy="215" r="10" fill="#3d2a18"/>
+          <circle cx="230" cy="215" r="10" fill="#3d2a18"/>
+          <circle cx="165" cy="211" r="4" fill="white"/>
+          <circle cx="225" cy="211" r="4" fill="white"/>
+          <text x="50%" y="430" text-anchor="middle" font-size="32" fill="#6b3c18" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif">${text}</text>
         </svg>
       `;
       return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

@@ -3,17 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pedigree - Koala Map JP</title>
+  <title>家系図 | コアラマップ JP</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='7' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='25' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='7' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='25' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='16' cy='18' r='12' fill='%239e8a6e'/%3E%3Cellipse cx='16' cy='20' rx='5' ry='4' fill='%235a3d2b'/%3E%3Ccircle cx='11' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='21' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='10.5' cy='14.5' r='1' fill='white'/%3E%3Ccircle cx='20.5' cy='14.5' r='1' fill='white'/%3E%3C/svg%3E">
 
   <style>
     :root {
-      --ink: #1c1a16;
-      --ink-soft: #4a4036;
-      --paper: #f3ead8;
-      --paper-deep: #eadcc3;
-      --accent: #8b2a1b;
-      --border: #b8a287;
-      --seal: #b43c2f;
+      --ink: #1a2e24;
+      --ink-soft: #4a6358;
+      --paper: #faf7f2;
+      --paper-deep: #f0ebe1;
+      --line: #c8bfb0;
+      --accent: #b85c1a;
+      --accent-soft: #f3dccb;
+      --green: #2d6a4f;
+      --green-soft: #d1e8dd;
     }
 
     * { box-sizing: border-box; }
@@ -21,79 +24,108 @@
     body {
       margin: 0;
       color: var(--ink);
-      font-family: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      font-family: "M PLUS Rounded 1c", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
       background:
-        radial-gradient(1200px 600px at 20% -10%, #fff7e8 0%, transparent 60%),
-        radial-gradient(900px 500px at 90% -20%, #fff0d8 0%, transparent 55%),
-        linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        repeating-linear-gradient(45deg, rgba(0,0,0,0.03) 0 1px, transparent 1px 6px),
-        repeating-linear-gradient(-45deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 7px);
-      mix-blend-mode: multiply;
-      opacity: 0.35;
-      pointer-events: none;
-      z-index: 0;
+        radial-gradient(1400px 700px at 20% -15%, #f5ede0 0%, transparent 55%),
+        radial-gradient(1000px 600px at 85% 110%, #ecdcca 0%, transparent 50%),
+        radial-gradient(600px 400px at 50% 50%, #fdf3e8 0%, transparent 70%),
+        linear-gradient(160deg, #fdfaf5 0%, #f0ebe1 50%, #f5ede0 100%);
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
     }
 
     header {
-      position: relative;
-      z-index: 1;
-      padding: 16px 18px;
-      border-bottom: 2px solid var(--border);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.25));
+      border-bottom: 1px solid var(--line);
+      background: rgba(250, 247, 242, 0.94);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    header .title-wrap {
+    .header-stripe {
+      height: 5px;
+      background: linear-gradient(90deg, #2d6a4f 0%, #4a9a6e 35%, #c87830 65%, #b85c1a 100%);
+    }
+
+    .header-inner {
+      padding: 10px 16px 12px;
       display: flex;
-      align-items: center;
-      gap: 12px;
+      align-items: flex-start;
+      gap: 16px;
+      justify-content: space-between;
+      flex-wrap: wrap;
     }
 
-    header .seal {
-      width: 36px;
-      height: 36px;
-      border-radius: 6px;
-      border: 2px solid #7e1f15;
-      color: #7e1f15;
-      display: grid;
-      place-items: center;
-      font-family: "Yuji Syuku", "Noto Serif JP", serif;
-      font-size: 16px;
-      letter-spacing: 2px;
-      background: #f6d9d5;
-      box-shadow: 0 2px 0 rgba(0,0,0,0.1);
-      transform: rotate(-2deg);
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 220px;
+    }
+
+    .header-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--green);
+      border-left: 4px solid var(--accent);
+      padding-left: 7px;
+      font-family: "M PLUS Rounded 1c", sans-serif;
     }
 
     #title {
-      font-size: 20px;
-      letter-spacing: 1px;
+      font-family: "M PLUS Rounded 1c", sans-serif;
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin: 0;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    .header-nav {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    .header-nav a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex: 1 1 560px;
     }
 
     .meta {
+      margin: 0;
       color: var(--ink-soft);
-      font-size: 12px;
-      margin-top: 6px;
+      font-size: 11px;
+      font-style: italic;
     }
 
     #net {
-      height: calc(100vh - 110px);
+      flex: 1;
+      min-height: 0;
       position: relative;
       z-index: 1;
       background:
-        linear-gradient(rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.58)),
+        linear-gradient(rgba(253, 249, 244, 0.62), rgba(253, 249, 244, 0.62)),
         url("./assets/image.png") center / cover no-repeat,
         repeating-linear-gradient(
           180deg,
-          rgba(248,241,227,0.45) 0px,
-          rgba(248,241,227,0.45) 120px,
+          rgba(240,225,200,0.3) 0px,
+          rgba(240,225,200,0.3) 120px,
           rgba(255,255,255,0) 120px,
           rgba(255,255,255,0) 150px
         );
@@ -102,20 +134,20 @@
     .controls {
       display: flex;
       gap: 12px;
-      margin-top: 8px;
       flex-wrap: wrap;
       font-size: 12px;
       color: var(--ink-soft);
       align-items: center;
     }
     .btn {
-      font-size: 12px;
-      padding: 4px 10px;
+      font-size: 13px;
+      padding: 6px 12px;
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #fff7ea;
-      color: var(--ink-soft);
+      border: 1px solid #d4a882;
+      background: linear-gradient(180deg, #fdf3e8 0%, #f3dccb 100%);
+      color: var(--ink);
       cursor: pointer;
+      font-weight: 700;
     }
     .controls label {
       display: inline-flex;
@@ -141,39 +173,61 @@
 
     a { color: inherit; }
 
-    @media (max-width: 720px) {
-      header {
-        padding: 14px 14px;
-      }
-      #title { font-size: 18px; }
-      #net { height: calc(100vh - 120px); }
+    @media (max-width: 900px) {
+      .header-inner { flex-direction: column; }
+      .header-right { align-items: flex-start; width: 100%; }
+    }
+
+    @media (max-width: 640px) {
+      .meta { display: none; }
+      .header-inner { padding: 8px 12px; gap: 8px; }
+      .controls { gap: 8px; }
     }
   </style>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Yuji+Syuku&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
   <!-- vis-network (CDN) -->
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
   <header>
-    <div class="title-wrap">
-      <div class="seal">系図</div>
-      <div><strong id="title">家系図</strong></div>
-    </div>
-    <div class="meta"><a id="backLink" href="./zoo.html?zooId=higashiyama-zoo">← 一覧へ戻る</a> / <a id="allLink" href="./pedigree-all.html">全体図へ</a></div>
-    <div class="meta">ノードクリックでその個体に移動 / ドラッグで移動 / ホイールで拡大</div>
-    <div class="controls">
-      <label><input id="toggleSex" type="checkbox" checked> 性別</label>
-      <label><input id="toggleBirth" type="checkbox" checked> 生年月日</label>
-      <span class="legend"><span class="dot female"></span>メス</span>
-      <span class="legend"><span class="dot male"></span>オス</span>
-      <span class="legend" style="color:var(--ink-soft)">† 天国</span>
-      <span class="legend" style="color:var(--ink-soft)">▲ さらに遡れる</span>
-      <button id="centerRoot" class="btn" type="button">中心へ</button>
-      <button id="fitAll" class="btn" type="button">全体表示</button>
+    <div class="header-stripe"></div>
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="header-label">コアラマップ JP</div>
+        <strong id="title" style="font-size:clamp(22px,3vw,32px);display:flex;align-items:center;gap:8px">
+          <svg width="26" height="26" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0">
+            <circle cx="7" cy="10" r="6" fill="#8b7355"/>
+            <circle cx="25" cy="10" r="6" fill="#8b7355"/>
+            <circle cx="7" cy="10" r="3.5" fill="#c4a882"/>
+            <circle cx="25" cy="10" r="3.5" fill="#c4a882"/>
+            <circle cx="16" cy="18" r="12" fill="#9e8a6e"/>
+            <ellipse cx="16" cy="20" rx="5" ry="4" fill="#5a3d2b"/>
+            <circle cx="11" cy="15" r="2.5" fill="#2d1e12"/>
+            <circle cx="21" cy="15" r="2.5" fill="#2d1e12"/>
+            <circle cx="10.5" cy="14.5" r="1" fill="white"/>
+            <circle cx="20.5" cy="14.5" r="1" fill="white"/>
+          </svg>
+          家系図
+        </strong>
+        <div class="header-nav"><a id="backLink" href="./zoo.html?zooId=higashiyama-zoo">← 一覧へ戻る</a></div>
+      </div>
+      <div class="header-right">
+        <div class="meta"><a id="allLink" href="./pedigree-all.html">全体図へ</a> / ノードクリックでその個体に移動 / ドラッグで移動 / ホイールで拡大</div>
+        <div class="controls">
+          <label><input id="toggleSex" type="checkbox" checked> 性別</label>
+          <label><input id="toggleBirth" type="checkbox" checked> 生年月日</label>
+          <span class="legend"><span class="dot female"></span>メス</span>
+          <span class="legend"><span class="dot male"></span>オス</span>
+          <span class="legend" style="color:var(--ink-soft)">† 天国</span>
+          <span class="legend" style="color:var(--ink-soft)">▲ 親情報あり</span>
+          <button id="centerRoot" class="btn" type="button">中心へ</button>
+          <button id="fitAll" class="btn" type="button">全体表示</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -186,10 +240,16 @@
     const koalaId = params.get("koalaId") || "monaka";
     const depth = parseInt(params.get("depth") || "2");
     const includeChildren = (params.get("includeChildren") || "1") !== "0";
-    const zooId = params.get("zooId") || "higashiyama-zoo";
+    const zooId = params.get("zooId");
 
-    document.getElementById("backLink").href = `./zoo.html?zooId=${encodeURIComponent(zooId)}`;
-    document.getElementById("allLink").href = `./pedigree-all.html?zooId=${encodeURIComponent(zooId)}`;
+    const backLinkEl = document.getElementById("backLink");
+    backLinkEl.href = zooId
+      ? `./zoo.html?zooId=${encodeURIComponent(zooId)}`
+      : "./";
+    backLinkEl.textContent = zooId ? "← 一覧へ戻る" : "← 全国一覧へ戻る";
+    document.getElementById("allLink").href = zooId
+      ? `./pedigree-all.html?zooId=${encodeURIComponent(zooId)}`
+      : "./pedigree-all.html";
 
     main().catch(err => {
       console.error(err);
@@ -236,33 +296,6 @@
         }
       }
 
-      // 祖先セット（ルートから上方向にBFS）
-      const ancestorSet = new Set([rootId]);
-      const ancQ = [rootId];
-      while (ancQ.length > 0) {
-        const nid = ancQ.shift();
-        const mid = childToMother.get(nid);
-        const fid = childToFather.get(nid);
-        if (mid && !ancestorSet.has(mid)) { ancestorSet.add(mid); ancQ.push(mid); }
-        if (fid && !ancestorSet.has(fid)) { ancestorSet.add(fid); ancQ.push(fid); }
-      }
-
-      // パートナーセット（ルートの子の共同親で、祖先でないもの）
-      const partnerSet = new Set();
-      const rootChildren = [
-        ...(motherToChildren.get(rootId) || []),
-        ...(fatherToChildren.get(rootId) || []),
-      ];
-      for (const cid of rootChildren) {
-        const mid = childToMother.get(cid);
-        const fid = childToFather.get(cid);
-        if (mid && !ancestorSet.has(mid)) partnerSet.add(mid);
-        if (fid && !ancestorSet.has(fid)) partnerSet.add(fid);
-      }
-
-      // ルートに祖先がいるかどうか（ancestorSet はルート自身を含む）
-      const rootHasAncestors = ancestorSet.size > 1;
-
       // 子どもを（母, 父）ペアでグループ化 → ユニオンノード生成
       const pairMap = new Map(); // "motherId|fatherId" → { motherId, fatherId, children[] }
       for (const n of rawNodes) {
@@ -275,7 +308,6 @@
       }
 
       // ユニオンノードと再構築したエッジを生成
-      const rootLevel = depth * 2;
       const unionNodes = [];
       const structuredEdges = [];
 
@@ -309,49 +341,64 @@
         }
       }
 
-      // ノードカラー（性別 × 生死）
-      function nodeColors(sex, deceased) {
-        if (sex === "M") return { bg: deceased ? "#e8f2fc" : "#dce8f5", border: deceased ? "#7aacce" : "#2f5c8f" };
-        if (sex === "F") return { bg: deceased ? "#fceef4" : "#f5dce8", border: deceased ? "#d4879d" : "#b13a2a" };
-        return { bg: deceased ? "#f0f0f0" : "#e8e8e8", border: deceased ? "#bbb" : "#999" };
-      }
-
       const toggleSex = document.getElementById("toggleSex");
       const toggleBirth = document.getElementById("toggleBirth");
 
-      function formatLabel(n) {
-        const showSex = toggleSex?.checked ?? true;
-        const showBirth = toggleBirth?.checked ?? true;
-        const sym = n.sex === "M" ? "♂" : n.sex === "F" ? "♀" : "?";
-        const lines = [showSex ? `${sym} ${n.name}` : n.name];
-        if (showBirth && n.birthDate && !n.birthDate.startsWith("????")) lines.push(n.birthDate);
-        if (n.status === "deceased") lines.push("† 天国");
-        if (n.hasParents) lines.push("▲ 遡れる");
-        return lines.join("\n");
+      function esc(str) {
+        return String(str).replace(/[&<>"']/g, s => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#39;",
+        }[s]));
+      }
+
+      function cardImage(n, isRoot, showSex, showBirth) {
+        const name = esc(n.name || "（不明）");
+        const birth = showBirth && n.birthDate && !n.birthDate.startsWith("????") ? esc(n.birthDate) : "";
+        const sex = showSex ? (n.sex === "F" ? "♀ メス" : n.sex === "M" ? "♂ オス" : "？ 不明") : "";
+        const status = n.status === "deceased" ? "† 天国" : n.status === "unknown" ? "状態不明" : "";
+        const parents = n.hasParents ? "▲ 親情報あり" : "";
+        const border = isRoot ? "#8b2a1b" : n.sex === "F" ? "#b84c7a" : n.sex === "M" ? "#2e6ab0" : "#7a8a80";
+        const bg = n.status === "deceased" ? "#fff2e9" : "#eef9f0";
+        const sexPillBg = n.sex === "F" ? "#ffe7f2" : n.sex === "M" ? "#e8f2ff" : "#edf2ee";
+        const sexPillText = n.sex === "F" ? "#b84c7a" : n.sex === "M" ? "#2e6ab0" : "#4a5a52";
+
+        const svg = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="240" height="300">
+            <rect x="6" y="6" width="228" height="288" rx="14" fill="${bg}" stroke="${border}" stroke-width="${isRoot ? 4 : 2}"/>
+            <rect x="16" y="16" width="208" height="148" rx="10" fill="#d7ebdc" stroke="#9cc6a5" stroke-width="1.5"/>
+            <circle cx="80" cy="72" r="30" fill="#c0d6c6"/>
+            <circle cx="160" cy="72" r="30" fill="#c0d6c6"/>
+            <circle cx="120" cy="104" r="44" fill="#d8e8dd"/>
+            <circle cx="120" cy="121" r="15" fill="#9bb7a5"/>
+            <circle cx="108" cy="98" r="4" fill="#33453c"/>
+            <circle cx="132" cy="98" r="4" fill="#33453c"/>
+            <rect x="18" y="20" width="72" height="24" rx="12" fill="${sexPillBg}" stroke="#c7ddd0"/>
+            <text x="54" y="37" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="12" fill="${sexPillText}" font-weight="700">${esc(sex || "コアラ")}</text>
+            <text x="120" y="194" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="19" fill="#1f3424" font-weight="800">${name}</text>
+            ${birth ? `<text x="120" y="219" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="13" fill="#36523f">${birth}</text>` : ""}
+            ${status ? `<text x="120" y="241" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="12" fill="#8c4e2a" font-weight="700">${esc(status)}</text>` : ""}
+            ${parents ? `<text x="120" y="261" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="12" fill="#3f6047">${esc(parents)}</text>` : ""}
+          </svg>
+        `;
+        return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
       }
 
       function buildVisNode(n) {
         const isRoot = n.id === rootId;
-        const deceased = n.status === "deceased";
-        const { bg, border } = nodeColors(n.sex, deceased);
+        const showSex = toggleSex?.checked ?? true;
+        const showBirth = toggleBirth?.checked ?? true;
         const node = {
           id: n.id,
-          label: formatLabel(n),
-          shape: "ellipse",
-          color: {
-            background: bg,
-            border: isRoot ? "#8b2a1b" : border,
-            highlight: { background: bg, border: "#8b2a1b" },
-            hover: { background: bg, border },
-          },
-          borderWidth: isRoot ? 3 : 2,
-          shapeProperties: deceased ? { borderDashes: [5, 3] } : {},
+          label: "",
+          shape: "image",
+          image: cardImage(n, isRoot, showSex, showBirth),
+          size: isRoot ? 55 : 50,
           shadow: { enabled: true, color: "rgba(0,0,0,0.12)", size: 6, x: 2, y: 2 },
-          title: n.hasParents ? `${n.name}（クリックでさらに遡る）` : n.name,
+          title: n.hasParents ? `${n.name}（クリックで親を表示）` : n.name,
         };
-        // パートナーはルートと同じ階層に固定
-        // ルートに祖先がない場合（例: ishin）はlevel 0に置く
-        if (partnerSet.has(n.id)) node.level = rootHasAncestors ? rootLevel : 0;
         return node;
       }
 
@@ -378,11 +425,10 @@
         nodes: {
           font: {
             color: "#1c1a16",
-            face: "Shippori Mincho, Noto Serif JP, Yu Mincho, serif",
+            face: "M PLUS Rounded 1c, Noto Sans JP, sans-serif",
             size: 13,
             align: "center",
-          },
-          widthConstraint: { minimum: 80, maximum: 150 },
+          }
         },
         edges: {
           smooth: { type: "cubicBezier", forceDirection: "vertical", roundness: 0.4 },
@@ -405,7 +451,14 @@
       });
 
       function updateLabels() {
-        networkData.nodes.update(rawNodes.map(n => ({ id: n.id, label: formatLabel(n) })));
+        const showSex = toggleSex?.checked ?? true;
+        const showBirth = toggleBirth?.checked ?? true;
+        networkData.nodes.update(
+          rawNodes.map(n => ({
+            id: n.id,
+            image: cardImage(n, n.id === rootId, showSex, showBirth),
+          }))
+        );
       }
 
       toggleSex.addEventListener("change", updateLabels);

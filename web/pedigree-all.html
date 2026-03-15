@@ -3,86 +3,294 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Global Pedigree - Koala Map JP</title>
+  <title>全コアラ家系図 | コアラマップ JP</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='7' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='25' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='7' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='25' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='16' cy='18' r='12' fill='%239e8a6e'/%3E%3Cellipse cx='16' cy='20' rx='5' ry='4' fill='%235a3d2b'/%3E%3Ccircle cx='11' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='21' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='10.5' cy='14.5' r='1' fill='white'/%3E%3Ccircle cx='20.5' cy='14.5' r='1' fill='white'/%3E%3C/svg%3E">
   <style>
     :root {
-      --ink: #1c1a16;
-      --ink-soft: #4a4036;
-      --paper: #f3ead8;
-      --paper-deep: #eadcc3;
-      --border: #b8a287;
+      --ink: #1a2e24;
+      --ink-soft: #4a6358;
+      --paper: #faf7f2;
+      --paper-deep: #f0ebe1;
+      --line: #c8bfb0;
+      --accent: #b85c1a;
+      --accent-soft: #f3dccb;
+      --green: #2d6a4f;
+      --green-soft: #d1e8dd;
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       color: var(--ink);
-      font-family: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", serif;
+      font-family: "M PLUS Rounded 1c", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
       background:
-        radial-gradient(1200px 600px at 20% -10%, #fff7e8 0%, transparent 60%),
-        radial-gradient(900px 500px at 90% -20%, #fff0d8 0%, transparent 55%),
-        linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
-    }
-    header {
-      padding: 14px 16px;
-      border-bottom: 2px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3));
-    }
-    .title { font-size: 20px; }
-    .meta { color: var(--ink-soft); font-size: 12px; margin-top: 6px; }
-    .controls {
-      margin-top: 8px;
+        radial-gradient(1400px 700px at 20% -15%, #f5ede0 0%, transparent 55%),
+        radial-gradient(1000px 600px at 85% 110%, #ecdcca 0%, transparent 50%),
+        radial-gradient(600px 400px at 50% 50%, #fdf3e8 0%, transparent 70%),
+        linear-gradient(160deg, #fdfaf5 0%, #f0ebe1 50%, #f5ede0 100%);
       display: flex;
-      gap: 10px;
+      flex-direction: column;
+      height: 100dvh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: rgba(250, 247, 242, 0.94);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-stripe {
+      height: 5px;
+      background: linear-gradient(90deg, #2d6a4f 0%, #4a9a6e 35%, #c87830 65%, #b85c1a 100%);
+    }
+
+    .header-inner {
+      padding: 10px 16px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      justify-content: space-between;
       flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 220px;
+    }
+
+    .header-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--green);
+      border-left: 4px solid var(--accent);
+      padding-left: 7px;
+      font-family: "M PLUS Rounded 1c", sans-serif;
+    }
+
+    #title {
+      font-family: "M PLUS Rounded 1c", sans-serif;
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin: 0;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    .header-nav {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    .header-nav a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex: 1 1 560px;
+    }
+
+    .meta {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--ink-soft);
+      align-items: center;
+    }
+
+    .controls input[type="search"],
+    .btn {
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(253, 249, 244, 0.9);
+      color: var(--ink);
+      font-family: inherit;
+    }
+
+    .controls input[type="search"] {
+      min-width: 220px;
+    }
+
+    .btn {
+      background: linear-gradient(180deg, #fdf3e8 0%, #f3dccb 100%);
+      border-color: #d4a882;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .controls label {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .legend {
+      display: inline-flex;
+      gap: 8px;
       align-items: center;
       font-size: 12px;
       color: var(--ink-soft);
     }
-    input, .btn {
-      font-size: 12px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 4px 10px;
-      background: #fff7ea;
-      color: var(--ink-soft);
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
     }
-    input { min-width: 220px; }
-    .btn { cursor: pointer; }
+
+    .dot.female { background: #b13a2a; }
+    .dot.male { background: #2f5c8f; }
+
     #net {
-      height: calc(100vh - 128px);
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      z-index: 1;
       background:
-        linear-gradient(rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.58)),
-        url("./assets/image.png") center / cover no-repeat;
+        linear-gradient(rgba(253, 249, 244, 0.62), rgba(253, 249, 244, 0.62)),
+        url("./assets/image.png") center / cover no-repeat,
+        repeating-linear-gradient(
+          180deg,
+          rgba(240,225,200,0.3) 0px,
+          rgba(240,225,200,0.3) 120px,
+          rgba(255,255,255,0) 120px,
+          rgba(255,255,255,0) 150px
+        );
+    }
+
+    a { color: inherit; }
+
+    @media (max-width: 900px) {
+      .header-inner { flex-direction: column; }
+      .header-right { align-items: flex-start; width: 100%; }
+    }
+
+    @media (max-width: 640px) {
+      .meta { display: none; }
+      .header-inner { padding: 8px 12px; gap: 8px; }
+      .controls { gap: 8px; }
     }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
   <header>
-    <div class="title"><strong>家系図 全体図</strong></div>
-    <div class="meta"><a id="backLink" href="./zoo.html?zooId=higashiyama-zoo">← 一覧へ戻る</a></div>
-    <div class="meta">ノードクリックで個別家系図へ移動</div>
-    <div class="controls">
-      <input id="q" type="search" placeholder="名前でハイライト" />
-      <button id="fitAll" class="btn" type="button">全体表示</button>
-      <span id="count"></span>
+    <div class="header-stripe"></div>
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="header-label">コアラマップ JP</div>
+        <strong id="title" style="font-size:clamp(22px,3vw,32px);display:flex;align-items:center;gap:8px">
+          <svg width="26" height="26" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0">
+            <circle cx="7" cy="10" r="6" fill="#8b7355"/>
+            <circle cx="25" cy="10" r="6" fill="#8b7355"/>
+            <circle cx="7" cy="10" r="3.5" fill="#c4a882"/>
+            <circle cx="25" cy="10" r="3.5" fill="#c4a882"/>
+            <circle cx="16" cy="18" r="12" fill="#9e8a6e"/>
+            <ellipse cx="16" cy="20" rx="5" ry="4" fill="#5a3d2b"/>
+            <circle cx="11" cy="15" r="2.5" fill="#2d1e12"/>
+            <circle cx="21" cy="15" r="2.5" fill="#2d1e12"/>
+            <circle cx="10.5" cy="14.5" r="1" fill="white"/>
+            <circle cx="20.5" cy="14.5" r="1" fill="white"/>
+          </svg>
+          家系図 全体図
+        </strong>
+        <div class="header-nav"><a href="./">← 全国一覧へ戻る</a></div>
+      </div>
+      <div class="header-right">
+        <div class="meta">ノードクリックで個別家系図へ移動 / ドラッグで移動 / ホイールで拡大</div>
+        <div class="controls">
+          <input id="q" type="search" placeholder="名前でハイライト" />
+          <label><input id="toggleSex" type="checkbox" checked> 性別</label>
+          <label><input id="toggleBirth" type="checkbox" checked> 生年月日</label>
+          <span class="legend"><span class="dot female"></span>メス</span>
+          <span class="legend"><span class="dot male"></span>オス</span>
+          <span class="legend" style="color:var(--ink-soft)">† 天国</span>
+          <button id="fitAll" class="btn" type="button">全体表示</button>
+          <span id="count"></span>
+        </div>
+      </div>
     </div>
   </header>
   <div id="net"></div>
 
   <script>
     const API_BASE = "/api";
-    const params = new URLSearchParams(location.search);
-    const zooId = params.get("zooId") || "higashiyama-zoo";
-    document.getElementById("backLink").href = `./zoo.html?zooId=${encodeURIComponent(zooId)}`;
 
     main().catch(err => {
       console.error(err);
       alert("全体図の読み込みに失敗しました: " + err.message);
     });
+
+    function esc(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;",
+      }[s]));
+    }
+
+    function cardImage(n, showSex, showBirth, highlighted) {
+      const name = esc(n.name || "（不明）");
+      const birth = showBirth && n.birthDate && !n.birthDate.startsWith("????") ? esc(n.birthDate) : "";
+      const sex = showSex ? (n.sex === "F" ? "♀ メス" : n.sex === "M" ? "♂ オス" : "？ 不明") : "";
+      const status = n.status === "deceased" ? "† 天国" : n.status === "unknown" ? "状態不明" : "";
+      const border = highlighted ? "#f09a24" : n.sex === "F" ? "#b84c7a" : n.sex === "M" ? "#2e6ab0" : "#7a8a80";
+      const bg = n.status === "deceased" ? "#fff2e9" : "#eef9f0";
+      const sexPillBg = n.sex === "F" ? "#ffe7f2" : n.sex === "M" ? "#e8f2ff" : "#edf2ee";
+      const sexPillText = n.sex === "F" ? "#b84c7a" : n.sex === "M" ? "#2e6ab0" : "#4a5a52";
+
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="240" height="300">
+          <rect x="6" y="6" width="228" height="288" rx="14" fill="${bg}" stroke="${border}" stroke-width="${highlighted ? 4 : 2}"/>
+          <rect x="16" y="16" width="208" height="148" rx="10" fill="#d7ebdc" stroke="#9cc6a5" stroke-width="1.5"/>
+          <circle cx="80" cy="72" r="30" fill="#c0d6c6"/>
+          <circle cx="160" cy="72" r="30" fill="#c0d6c6"/>
+          <circle cx="120" cy="104" r="44" fill="#d8e8dd"/>
+          <circle cx="120" cy="121" r="15" fill="#9bb7a5"/>
+          <circle cx="108" cy="98" r="4" fill="#33453c"/>
+          <circle cx="132" cy="98" r="4" fill="#33453c"/>
+          <rect x="18" y="20" width="72" height="24" rx="12" fill="${sexPillBg}" stroke="#c7ddd0"/>
+          <text x="54" y="37" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="12" fill="${sexPillText}" font-weight="700">${esc(sex || "コアラ")}</text>
+          <text x="120" y="194" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="19" fill="#1f3424" font-weight="800">${name}</text>
+          ${birth ? `<text x="120" y="219" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="13" fill="#36523f">${birth}</text>` : ""}
+          ${status ? `<text x="120" y="241" text-anchor="middle" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif" font-size="12" fill="#8c4e2a" font-weight="700">${esc(status)}</text>` : ""}
+        </svg>
+      `;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
 
     async function main() {
       const res = await fetch(`${API_BASE}/pedigree/all`);
@@ -93,26 +301,84 @@
         id: n.id,
         name: n.name || "（不明）",
         sex: n.sex || "U",
-        birthDate: n.birthDate || ""
+        birthDate: n.birthDate || "",
+        status: n.status || "unknown",
       }));
+      const nodeMap = new Map(rawNodes.map(n => [n.id, n]));
 
-      const nodes = new vis.DataSet(rawNodes.map(n => ({
-        id: n.id,
-        label: formatLabel(n),
-        shape: "dot",
-        size: 15,
-        color: "#e6d6c1",
-        borderWidth: 1
-      })));
+      // エッジから関係マップを構築
+      const childToMother = new Map();
+      const childToFather = new Map();
 
-      const edges = new vis.DataSet((data.edges || []).map(e => ({
-        from: e.from,
-        to: e.to,
-        arrows: "to",
-        color: e.type === "mother"
-          ? { color: "#b13a2a", highlight: "#b13a2a", hover: "#b13a2a" }
-          : { color: "#2f5c8f", highlight: "#2f5c8f", hover: "#2f5c8f" }
-      })));
+      for (const e of (data.edges || [])) {
+        if (e.type === "mother") {
+          childToMother.set(e.to, e.from);
+        } else {
+          childToFather.set(e.to, e.from);
+        }
+      }
+
+      // 子どもを（母, 父）ペアでグループ化 → ユニオンノード生成
+      const pairMap = new Map();
+      for (const n of rawNodes) {
+        const mid = childToMother.get(n.id) || "";
+        const fid = childToFather.get(n.id) || "";
+        if (!mid && !fid) continue;
+        const key = `${mid}|${fid}`;
+        if (!pairMap.has(key)) pairMap.set(key, { motherId: mid, fatherId: fid, children: [] });
+        pairMap.get(key).children.push(n.id);
+      }
+
+      const unionNodes = [];
+      const structuredEdges = [];
+
+      for (const [key, { motherId: mid, fatherId: fid, children }] of pairMap) {
+        if (mid && fid) {
+          const unionId = `union:${key}`;
+          const mName = nodeMap.get(mid)?.name || "";
+          const fName = nodeMap.get(fid)?.name || "";
+          unionNodes.push({
+            id: unionId,
+            label: "",
+            shape: "dot",
+            size: 7,
+            color: { background: "#c4a882", border: "#c4a882", highlight: { background: "#a08060", border: "#a08060" }, hover: { background: "#a08060", border: "#a08060" } },
+            title: `${mName} × ${fName}`,
+            font: { size: 1 },
+          });
+          structuredEdges.push({ from: mid, to: unionId, arrows: "", width: 2, color: { color: "#b13a2a" }, smooth: { type: "straightCross" } });
+          structuredEdges.push({ from: fid, to: unionId, arrows: "", width: 2, color: { color: "#2f5c8f" }, smooth: { type: "straightCross" } });
+          for (const cid of children) {
+            structuredEdges.push({ from: unionId, to: cid, arrows: "to", width: 1.5, color: { color: "#7a6045" }, smooth: { type: "cubicBezier", forceDirection: "vertical", roundness: 0.3 } });
+          }
+        } else {
+          const parentId = mid || fid;
+          const color = mid ? "#b13a2a" : "#2f5c8f";
+          for (const cid of children) {
+            structuredEdges.push({ from: parentId, to: cid, arrows: "to", width: 2, color: { color }, smooth: { type: "cubicBezier", forceDirection: "vertical", roundness: 0.3 } });
+          }
+        }
+      }
+
+      const toggleSex = document.getElementById("toggleSex");
+      const toggleBirth = document.getElementById("toggleBirth");
+
+      function buildVisNode(n, highlighted) {
+        const showSex = toggleSex?.checked ?? true;
+        const showBirth = toggleBirth?.checked ?? true;
+        return {
+          id: n.id,
+          label: "",
+          shape: "image",
+          image: cardImage(n, showSex, showBirth, highlighted),
+          size: highlighted ? 54 : 50,
+          shadow: { enabled: true, color: "rgba(0,0,0,0.12)", size: 6, x: 2, y: 2 },
+          title: n.name,
+        };
+      }
+
+      const nodes = new vis.DataSet([...rawNodes.map(n => buildVisNode(n, false)), ...unionNodes]);
+      const edges = new vis.DataSet(structuredEdges);
 
       document.getElementById("count").textContent = `ノード: ${rawNodes.length} / エッジ: ${(data.edges || []).length}`;
 
@@ -124,19 +390,15 @@
             enabled: true,
             stabilization: { iterations: 300 }
           },
-          interaction: { hover: true },
+          interaction: { hover: true, tooltipDelay: 300 },
           nodes: {
             font: {
               color: "#1c1a16",
-              face: "Shippori Mincho, Noto Serif JP, Yu Mincho, serif",
-              size: 12,
+              face: "M PLUS Rounded 1c, Noto Sans JP, sans-serif",
+              size: 13,
               align: "center"
             }
           },
-          edges: {
-            smooth: { type: "dynamic" },
-            width: 1.5
-          }
         }
       );
 
@@ -145,28 +407,26 @@
       network.on("click", (p) => {
         const targetId = p?.nodes?.[0];
         if (!targetId || String(targetId).startsWith("unknown:")) return;
-        location.href = `./pedigree.html?koalaId=${encodeURIComponent(targetId)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
+        location.href = `./pedigree.html?koalaId=${encodeURIComponent(targetId)}&depth=2&includeChildren=1`;
       });
 
-      const qInput = document.getElementById("q");
-      qInput.addEventListener("input", () => {
-        const q = (qInput.value || "").trim().toLowerCase();
-        nodes.update(rawNodes.map(n => ({
-          id: n.id,
-          label: formatLabel(n),
-          color: q !== "" && (n.name || "").toLowerCase().includes(q) ? "#ffd27f" : "#e6d6c1",
-          size: q !== "" && (n.name || "").toLowerCase().includes(q) ? 19 : 15
-        })));
-      });
+      function rerenderNodes() {
+        const q = (document.getElementById("q").value || "").trim().toLowerCase();
+        nodes.update(rawNodes.map(n => {
+          const hit = q !== "" && (n.name || "").toLowerCase().includes(q);
+          return {
+            id: n.id,
+            image: cardImage(n, toggleSex.checked, toggleBirth.checked, hit),
+            size: hit ? 54 : 50,
+          };
+        }));
+      }
 
+
+      document.getElementById("q").addEventListener("input", rerenderNodes);
+      toggleSex.addEventListener("change", rerenderNodes);
+      toggleBirth.addEventListener("change", rerenderNodes);
       document.getElementById("fitAll").addEventListener("click", () => network.fit({ animation: true }));
-    }
-
-    function formatLabel(n) {
-      const lines = [n.name];
-      if (n.sex) lines.push(n.sex);
-      if (n.birthDate) lines.push(n.birthDate);
-      return lines.join("\n");
     }
   </script>
 </body>

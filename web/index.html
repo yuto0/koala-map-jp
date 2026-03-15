@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Koala Map JP (local)</title>
+  <title>コアラマップ JP</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='7' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='25' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='7' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='25' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='16' cy='18' r='12' fill='%239e8a6e'/%3E%3Cellipse cx='16' cy='20' rx='5' ry='4' fill='%235a3d2b'/%3E%3Ccircle cx='11' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='21' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='10.5' cy='14.5' r='1' fill='white'/%3E%3Ccircle cx='20.5' cy='14.5' r='1' fill='white'/%3E%3C/svg%3E">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,17 +12,16 @@
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #183026;
-      --ink-soft: #465c52;
-      --leaf-1: #eef8f1;
-      --leaf-2: #cfe7d8;
-      --leaf-3: #9dc9b0;
-      --moss: #3f8964;
-      --euca: #62b286;
-      --paper: #f8fcf9;
+      --ink: #1a2e24;
+      --ink-soft: #4a6358;
+      --paper: #faf7f2;
+      --paper-deep: #f0ebe1;
       --card: #ffffff;
-      --line: #bdd8c8;
-      --peach: #ffd8c2;
+      --line: #c8bfb0;
+      --accent: #b85c1a;
+      --accent-soft: #f3dccb;
+      --green: #2d6a4f;
+      --green-soft: #d1e8dd;
     }
 
     * { box-sizing: border-box; }
@@ -31,19 +31,28 @@
       font-family: "M PLUS Rounded 1c", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(980px 600px at -10% -22%, #edf9f1 0%, transparent 62%),
-        radial-gradient(900px 540px at 110% -24%, #f4fff8 0%, transparent 56%),
-        linear-gradient(180deg, #fcfffc 0%, #eff8f2 100%);
+        radial-gradient(980px 600px at -10% -22%, #f5ede0 0%, transparent 62%),
+        radial-gradient(900px 540px at 110% -24%, #fdf8f1 0%, transparent 56%),
+        linear-gradient(180deg, #fdfaf5 0%, #f5ede0 100%);
     }
 
     header {
-      padding: 16px 16px 12px;
+      padding: 0 0 0 0;
       border-bottom: 1px solid var(--line);
-      background: rgba(248, 255, 250, 0.88);
+      background: rgba(250, 247, 242, 0.92);
       backdrop-filter: blur(8px);
       position: sticky;
       top: 0;
       z-index: 10;
+    }
+
+    .header-stripe {
+      height: 5px;
+      background: linear-gradient(90deg, #2d6a4f 0%, #4a9a6e 35%, #c87830 65%, #b85c1a 100%);
+    }
+
+    .header-body {
+      padding: 12px 16px 12px;
     }
 
     .headline {
@@ -59,21 +68,9 @@
       font-weight: 800;
       letter-spacing: 0.2px;
       font-size: clamp(22px, 2.7vw, 32px);
-      position: relative;
-      display: inline-block;
-      padding-right: 22px;
-    }
-
-    .brand-title::after {
-      content: "";
-      position: absolute;
-      right: 0;
-      top: 8px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50% 0;
-      background: linear-gradient(135deg, #91c9aa 0%, #61a37f 100%);
-      transform: rotate(-20deg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .brand-sub {
@@ -123,7 +120,7 @@
       overflow: hidden;
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, 0.72);
-      box-shadow: 0 14px 28px rgba(41, 103, 72, 0.12);
+      box-shadow: 0 14px 28px rgba(90, 61, 43, 0.1);
     }
 
     #map {
@@ -137,7 +134,7 @@
       min-height: 420px;
       max-height: calc(100vh - 120px);
       background:
-        linear-gradient(180deg, #f6fbf7 0%, #f2f8f3 100%);
+        linear-gradient(180deg, #fdf9f4 0%, #f5ede0 100%);
     }
 
     .toolbar {
@@ -145,7 +142,7 @@
       border-bottom: 1px solid var(--line);
       display: grid;
       gap: 8px;
-      background: linear-gradient(180deg, rgba(246,255,248,0.96), rgba(240,250,244,0.92));
+      background: linear-gradient(180deg, rgba(253,249,244,0.98), rgba(245,237,224,0.94));
     }
 
     .toolbar-row {
@@ -160,7 +157,7 @@
       width: 100%;
       font-family: inherit;
       font-size: 14px;
-      border: 1px solid #abd1bb;
+      border: 1px solid var(--line);
       border-radius: 12px;
       padding: 10px 11px;
       background: #fff;
@@ -175,14 +172,14 @@
 
     .btn {
       cursor: pointer;
-      background: linear-gradient(180deg, #f5fff8 0%, #e7f7ed 100%);
+      background: linear-gradient(180deg, #fdf3e8 0%, #f3dccb 100%);
       font-weight: 800;
       transition: transform 120ms ease, box-shadow 120ms ease;
     }
 
     .btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(67, 128, 95, 0.2);
+      box-shadow: 0 6px 16px rgba(184, 92, 26, 0.2);
     }
 
     .count-line {
@@ -200,11 +197,11 @@
 
     .card {
       background: var(--card);
-      border: 1px solid #c8e1d2;
+      border: 1px solid var(--line);
       border-radius: 16px;
       padding: 12px;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(58, 104, 80, 0.1);
+      box-shadow: 0 10px 20px rgba(90, 61, 43, 0.08);
       opacity: 0;
       transform: translateY(8px);
       animation: rise 220ms ease forwards;
@@ -216,15 +213,15 @@
       position: absolute;
       inset: 0 auto 0 0;
       width: 7px;
-      background: linear-gradient(180deg, var(--leaf-3), var(--moss));
+      background: linear-gradient(180deg, #c87830, #b85c1a);
       border-radius: 16px 0 0 16px;
     }
 
-    .card:hover { border-color: #8fc4a7; }
+    .card:hover { border-color: #a8957e; }
 
     .card.active {
-      border-color: var(--moss);
-      box-shadow: 0 0 0 2px rgba(79, 145, 108, 0.24), 0 12px 20px rgba(58, 104, 80, 0.14);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(184, 92, 26, 0.22), 0 12px 20px rgba(90, 61, 43, 0.12);
     }
 
     @keyframes rise {
@@ -237,8 +234,8 @@
       display: inline-block;
       color: var(--ink);
       text-decoration: none;
-      background: linear-gradient(180deg, #f5fff8 0%, #e7f7ed 100%);
-      border: 1px solid #abd1bb;
+      background: linear-gradient(180deg, #fdf3e8 0%, #f3dccb 100%);
+      border: 1px solid #d4a882;
       border-radius: 10px;
       padding: 4px 10px;
       font-size: 15px;
@@ -246,9 +243,9 @@
       transition: box-shadow 120ms ease, transform 120ms ease;
     }
     .zoo-link:hover {
-      color: #1e5c3d;
-      border-color: #7ab898;
-      box-shadow: 0 4px 12px rgba(58, 104, 80, 0.18);
+      color: var(--accent);
+      border-color: #b85c1a;
+      box-shadow: 0 4px 12px rgba(184, 92, 26, 0.18);
       transform: translateY(-1px);
     }
 
@@ -258,11 +255,11 @@
 
     .site-link {
       font-size: 12px;
-      color: var(--moss);
+      color: var(--green);
       text-decoration: none;
-      border-bottom: 1px solid #9dc9b0;
+      border-bottom: 1px solid var(--green-soft);
     }
-    .site-link:hover { color: #1f5f3f; border-bottom-color: #1f5f3f; }
+    .site-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
     .koala-count {
       font-size: 12px;
@@ -272,7 +269,7 @@
     }
 
     .sub { color: var(--ink-soft); margin-top: 6px; font-size: 14px; }
-    .small { color: #41594f; margin-top: 7px; font-size: 13px; line-height: 1.6; font-weight: 500; }
+    .small { color: var(--ink-soft); margin-top: 7px; font-size: 13px; line-height: 1.6; font-weight: 500; }
 
     .popup-actions {
       margin-top: 8px;
@@ -287,7 +284,7 @@
       padding: 4px 8px;
       border-radius: 999px;
       border: 1px solid var(--line);
-      background: #f3fff7;
+      background: var(--accent-soft);
       color: var(--ink-soft);
       text-decoration: none;
     }
@@ -314,13 +311,13 @@
     }
 
     .leaflet-popup-content-wrapper {
-      background: #fcfffd;
+      background: #fdfaf5;
       border: 1px solid var(--line);
       border-radius: 12px;
-      box-shadow: 0 12px 24px rgba(50, 93, 72, 0.16);
+      box-shadow: 0 12px 24px rgba(90, 61, 43, 0.14);
     }
 
-    .leaflet-popup-tip { background: #fcfffd; }
+    .leaflet-popup-tip { background: #fdfaf5; }
 
     #map .leaflet-tile { filter: none; }
 
@@ -340,7 +337,7 @@
       border-radius: 10px;
       border: 1px solid var(--line);
       object-fit: cover;
-      background: #eef6f0;
+      background: #f0ebe1;
     }
 
     .popup-title { font-weight: 800; font-size: 14px; }
@@ -352,9 +349,9 @@
       width: 24px;
       height: 24px;
       border-radius: 999px;
-      border: 1px solid #a9ccb7;
-      background: #f5fff8;
-      color: #2e6b4a;
+      border: 1px solid #d4a882;
+      background: #fdf3e8;
+      color: var(--accent);
       font-size: 15px;
       line-height: 1;
       font-weight: 700;
@@ -397,15 +394,32 @@
 </head>
 <body>
   <header>
-    <div class="headline">
-      <div>
-        <h1 class="brand-title">Koala Map JP</h1>
-        <div class="brand-sub">コアラ名で検索して、どの動物園にいるかを確認</div>
-      </div>
-      <div class="hero-stats">
-        <span id="statZoos" class="stat"><strong>動物園</strong>読み込み中</span>
-        <span id="statKoalas" class="stat"><strong>登録コアラ</strong>読み込み中</span>
-        <span id="statUpdated" class="stat"><strong>最終確認</strong>-</span>
+    <div class="header-stripe"></div>
+    <div class="header-body">
+      <div class="headline">
+        <div>
+          <h1 class="brand-title">
+            <svg width="30" height="30" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="7" cy="10" r="6" fill="#8b7355"/>
+              <circle cx="25" cy="10" r="6" fill="#8b7355"/>
+              <circle cx="7" cy="10" r="3.5" fill="#c4a882"/>
+              <circle cx="25" cy="10" r="3.5" fill="#c4a882"/>
+              <circle cx="16" cy="18" r="12" fill="#9e8a6e"/>
+              <ellipse cx="16" cy="20" rx="5" ry="4" fill="#5a3d2b"/>
+              <circle cx="11" cy="15" r="2.5" fill="#2d1e12"/>
+              <circle cx="21" cy="15" r="2.5" fill="#2d1e12"/>
+              <circle cx="10.5" cy="14.5" r="1" fill="white"/>
+              <circle cx="20.5" cy="14.5" r="1" fill="white"/>
+            </svg>
+            コアラマップ JP
+          </h1>
+          <div class="brand-sub">コアラ名で検索して、どの動物園にいるかを確認</div>
+        </div>
+        <div class="hero-stats">
+          <span id="statZoos" class="stat"><strong>動物園</strong>読み込み中</span>
+          <span id="statKoalas" class="stat"><strong>登録コアラ</strong>読み込み中</span>
+          <span id="statUpdated" class="stat"><strong>最終確認</strong>-</span>
+        </div>
       </div>
     </div>
   </header>
@@ -802,24 +816,24 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="240" height="300">
           <defs>
             <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#f4fff8"/>
-              <stop offset="1" stop-color="#dff3e7"/>
+              <stop offset="0" stop-color="#fdf3e8"/>
+              <stop offset="1" stop-color="#ecdcca"/>
             </linearGradient>
           </defs>
           <rect width="100%" height="100%" fill="url(#g)"/>
-          <ellipse cx="120" cy="230" rx="72" ry="18" fill="#d2e9da"/>
-          <circle cx="74" cy="95" r="40" fill="#c6ddce"/>
-          <circle cx="166" cy="95" r="40" fill="#c6ddce"/>
-          <circle cx="120" cy="134" r="56" fill="#e3f2e8"/>
-          <circle cx="102" cy="130" r="9" fill="#2e5140"/>
-          <circle cx="138" cy="130" r="9" fill="#2e5140"/>
+          <ellipse cx="120" cy="230" rx="72" ry="18" fill="#d9c4ab"/>
+          <circle cx="74" cy="95" r="40" fill="#c4ae8e"/>
+          <circle cx="166" cy="95" r="40" fill="#c4ae8e"/>
+          <circle cx="120" cy="134" r="56" fill="#d9c6ad"/>
+          <circle cx="102" cy="130" r="9" fill="#3d2a18"/>
+          <circle cx="138" cy="130" r="9" fill="#3d2a18"/>
           <circle cx="100" cy="127" r="3" fill="#ffffff"/>
           <circle cx="136" cy="127" r="3" fill="#ffffff"/>
-          <ellipse cx="120" cy="156" rx="16" ry="13" fill="#86aa95"/>
+          <ellipse cx="120" cy="156" rx="16" ry="13" fill="#7a5c3c"/>
           <ellipse cx="93" cy="150" rx="8" ry="5" fill="#f5c4bc"/>
           <ellipse cx="147" cy="150" rx="8" ry="5" fill="#f5c4bc"/>
-          <path d="M106 174 Q120 186 134 174" stroke="#638d76" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <text x="50%" y="262" text-anchor="middle" font-size="22" fill="#2f6d4d" font-family="M PLUS Rounded 1c, Zen Kaku Gothic New, sans-serif">${text}</text>
+          <path d="M106 174 Q120 186 134 174" stroke="#8c5a30" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <text x="50%" y="262" text-anchor="middle" font-size="22" fill="#6b3c18" font-family="M PLUS Rounded 1c, Zen Kaku Gothic New, sans-serif">${text}</text>
         </svg>
       `;
       return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
