@@ -82,7 +82,7 @@ gcloud projects add-iam-policy-binding koala-map-jp \
 ## 6. テスト環境へデプロイ（先行）
 リポジトリルートで実行:
 ```bash
-cd /Users/yuto/Developer/koala-map-jp
+cd /path/to/koala-map-jp
 ./infra/deploy-test.sh
 ```
 
@@ -103,7 +103,7 @@ curl -i https://koala-map-jp-test.web.app/api/health
 ## 7. 本番デプロイ（テスト確認後）
 リポジトリルートで実行:
 ```bash
-cd /Users/yuto/Developer/koala-map-jp
+cd /path/to/koala-map-jp
 ./infra/deploy-prod.sh
 ```
 
