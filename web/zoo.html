@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>コアラマップ JP</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='7' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='25' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='7' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='25' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='16' cy='18' r='12' fill='%239e8a6e'/%3E%3Cellipse cx='16' cy='20' rx='5' ry='4' fill='%235a3d2b'/%3E%3Ccircle cx='11' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='21' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='10.5' cy='14.5' r='1' fill='white'/%3E%3Ccircle cx='20.5' cy='14.5' r='1' fill='white'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #1a2e24;
+      --ink-soft: #4a6358;
+      --paper: #faf7f2;
+      --paper-deep: #f0ebe1;
+      --line: #c8bfb0;
+      --accent: #b85c1a;
+      --accent-soft: #f3dccb;
+      --green: #2d6a4f;
+      --green-soft: #d1e8dd;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "M PLUS Rounded 1c", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1400px 700px at 20% -15%, #f5ede0 0%, transparent 55%),
+        radial-gradient(1000px 600px at 85% 110%, #ecdcca 0%, transparent 50%),
+        radial-gradient(600px 400px at 50% 50%, #fdf3e8 0%, transparent 70%),
+        linear-gradient(160deg, #fdfaf5 0%, #f0ebe1 50%, #f5ede0 100%);
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: rgba(250, 247, 242, 0.94);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-stripe {
+      height: 5px;
+      background: linear-gradient(90deg, #2d6a4f 0%, #4a9a6e 35%, #c87830 65%, #b85c1a 100%);
+    }
+
+    .header-inner {
+      padding: 10px 16px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--green);
+      border-left: 4px solid var(--accent);
+      padding-left: 7px;
+      font-family: "M PLUS Rounded 1c", sans-serif;
+    }
+
+    .title {
+      font-family: "M PLUS Rounded 1c", sans-serif;
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin: 0;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    .header-nav {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    .header-nav a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .meta {
+      font-size: 11px;
+      color: var(--ink-soft);
+      font-style: italic;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.55);
+    }
+
+    .stat {
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 700;
+      padding: 5px 12px;
+      text-align: center;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .stat:last-child { border-right: none; }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: var(--ink-soft);
+      font-family: "M PLUS Rounded 1c", sans-serif;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      font-family: "M PLUS Rounded 1c", sans-serif;
+    }
+
+    main {
+      padding: 14px 16px 28px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .toolbar {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(243, 220, 203, 0.45);
+      padding: 10px;
+    }
+
+    .toolbar-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .toolbar input,
+    .toolbar select,
+    .btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.75);
+      color: var(--ink);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .btn {
+      cursor: pointer;
+      font-weight: 700;
+      background: linear-gradient(180deg, #fdf3e8 0%, #f3dccb 100%);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(184, 92, 26, 0.18);
+    }
+
+    .count {
+      font-size: 12px;
+      color: var(--ink-soft);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+
+    .album {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .card {
+      background: rgba(253, 249, 244, 0.95);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 8px 20px rgba(90, 61, 43, 0.1);
+      cursor: pointer;
+      transform: translateY(6px);
+      opacity: 0;
+      animation: card-in 220ms ease forwards;
+    }
+
+    @keyframes card-in {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .card:hover {
+      border-color: #d4a882;
+      box-shadow: 0 10px 24px rgba(90, 61, 43, 0.16);
+    }
+
+    .photo-wrap {
+      position: relative;
+    }
+
+    .photo {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #d9c4ab;
+      display: block;
+      object-fit: cover;
+    }
+
+    .sex-pill {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 14px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.88);
+      color: var(--ink);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sex-pill.female { color: #b84c7a; border-color: #f0b8d0; background: rgba(255,240,248,0.92); }
+    .sex-pill.male   { color: #2e6ab0; border-color: #a8caf0; background: rgba(240,248,255,0.92); }
+
+    .name {
+      margin-top: 8px;
+      font-family: "M PLUS Rounded 1c", sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: var(--ink);
+    }
+
+    .sub {
+      color: var(--ink-soft);
+      font-size: 12px;
+      font-weight: 400;
+      margin-top: 3px;
+      display: grid;
+      gap: 3px;
+    }
+
+    .status {
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(209, 232, 221, 0.6);
+      color: var(--ink-soft);
+      display: inline-block;
+    }
+
+    .status.deceased {
+      border-color: #d4a882;
+      background: rgba(243, 220, 203, 0.7);
+      color: var(--accent);
+    }
+
+    .empty {
+      margin-top: 12px;
+      color: var(--ink-soft);
+      font-size: 12px;
+      text-align: center;
+      display: none;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(220, 242, 224, 0.5);
+    }
+    .empty.show { display: block; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 30, 14, 0.52);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      padding: 16px;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(380px, 95vw);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(253, 249, 244, 0.99);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 24px 46px rgba(90, 61, 43, 0.28);
+      padding: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-title {
+      font-family: "M PLUS Rounded 1c", sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .close-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.7);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--ink-soft);
+      font-family: inherit;
+    }
+
+    .modal-photo {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+      background: #d9c4ab;
+      margin-top: 12px;
+      display: block;
+    }
+
+    .modal-info {
+      font-size: 13px;
+      color: var(--ink-soft);
+      display: grid;
+      gap: 8px;
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+
+    .modal-info-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .modal-info-label {
+      font-weight: 700;
+      color: var(--green);
+      min-width: 52px;
+      flex-shrink: 0;
+    }
+
+    .modal-actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #d4a882;
+      color: var(--accent);
+      background: rgba(243, 220, 203, 0.7);
+      text-decoration: none;
+    }
+
+    .action:hover {
+      background: rgba(243, 220, 203, 1);
+    }
+
+    a { color: inherit; }
+
+    @media (max-width: 900px) {
+      .toolbar-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-inner { flex-direction: column; gap: 10px; }
+      .header-right { align-items: flex-start; }
+      .stats { grid-template-columns: repeat(4, 1fr); }
+      main { padding: 12px 12px 24px; }
+      .toolbar-row { grid-template-columns: 1fr; }
+      .album { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-stripe"></div>
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="header-label">コアラマップ JP</div>
+        <h1 id="zooTitle" class="title" style="display:flex;align-items:center;gap:8px">
+          <svg width="26" height="26" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0">
+            <circle cx="7" cy="10" r="6" fill="#8b7355"/>
+            <circle cx="25" cy="10" r="6" fill="#8b7355"/>
+            <circle cx="7" cy="10" r="3.5" fill="#c4a882"/>
+            <circle cx="25" cy="10" r="3.5" fill="#c4a882"/>
+            <circle cx="16" cy="18" r="12" fill="#9e8a6e"/>
+            <ellipse cx="16" cy="20" rx="5" ry="4" fill="#5a3d2b"/>
+            <circle cx="11" cy="15" r="2.5" fill="#2d1e12"/>
+            <circle cx="21" cy="15" r="2.5" fill="#2d1e12"/>
+            <circle cx="10.5" cy="14.5" r="1" fill="white"/>
+            <circle cx="20.5" cy="14.5" r="1" fill="white"/>
+          </svg>
+          動物園
+        </h1>
+        <div class="header-nav"><a href="./">← 地図へ戻る</a></div>
+      </div>
+      <div class="header-right">
+        <div class="meta" id="zooMeta">コアラ一覧</div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">現存</span>
+            <span class="stat-value" id="statAlive">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">♀ メス</span>
+            <span class="stat-value" id="statFemale">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">♂ オス</span>
+            <span class="stat-value" id="statMale">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">不明</span>
+            <span class="stat-value" id="statUnknown">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="toolbar-row">
+        <input id="q" type="search" placeholder="名前で検索" />
+        <select id="sexFilter">
+          <option value="">性別: すべて</option>
+          <option value="M">性別: オス</option>
+          <option value="F">性別: メス</option>
+          <option value="U">性別: 不明</option>
+        </select>
+        <select id="statusFilter">
+          <option value="">状態: すべて</option>
+          <option value="alive" selected>状態: 現存</option>
+          <option value="deceased">状態: 死亡</option>
+          <option value="unknown">状態: 不明</option>
+        </select>
+        <select id="sortOrder">
+          <option value="name">並び順: 名前（あいうえお）</option>
+          <option value="birth_desc">並び順: 生年（新しい順）</option>
+          <option value="birth_asc">並び順: 生年（古い順）</option>
+        </select>
+      </div>
+      <div class="toolbar-row">
+        <button id="clearFilter" class="btn" type="button">条件クリア</button>
+        <div id="count" class="count">読み込み中…</div>
+      </div>
+    </div>
+
+    <div id="cards" class="album"></div>
+    <div id="empty" class="empty">該当するコアラがいません</div>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <div id="modalTitle" class="modal-title">コアラ詳細</div>
+        <button id="modalClose" class="close-btn" type="button">閉じる</button>
+      </div>
+      <img id="modalPhoto" class="modal-photo" alt="">
+      <div class="modal-info">
+        <div class="modal-info-row"><span class="modal-info-label">名前</span><span id="modalName"></span></div>
+        <div class="modal-info-row"><span class="modal-info-label">性別</span><span id="modalSex"></span></div>
+        <div class="modal-info-row"><span class="modal-info-label">誕生日</span><span id="modalBirth"></span></div>
+        <div class="modal-info-row" id="modalStatusRow"><span class="modal-info-label">状態</span><span id="modalStatus"></span></div>
+        <div class="modal-info-row"><span class="modal-info-label">母</span><span id="modalMother"></span></div>
+        <div class="modal-info-row"><span class="modal-info-label">父</span><span id="modalFather"></span></div>
+      </div>
+      <div class="modal-actions">
+        <a id="modalPedigree" class="action" href="#">家系図へ →</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "/api";
+
+    const params = new URLSearchParams(location.search);
+    const zooId = params.get("zooId") || "higashiyama-zoo";
+
+    main().catch(err => {
+      console.error(err);
+      alert("読み込みに失敗しました: " + err.message);
+    });
+
+    async function main() {
+      const [koalas, zoo] = await Promise.all([
+        getKoalasByZoo(zooId),
+        getZoo(zooId)
+      ]);
+
+      const titleText = zoo?.name || `Zoo: ${zooId}`;
+      document.getElementById("zooTitle").textContent = titleText;
+      document.getElementById("zooMeta").textContent = zoo?.pref || zoo?.city ? `${zoo.pref || ""} ${zoo.city || ""} のコアラ一覧` : "コアラ一覧（写真クリックで詳細 / カードクリックで家系図）";
+
+      const countEl = document.getElementById("count");
+      const cardsEl = document.getElementById("cards");
+      const emptyEl = document.getElementById("empty");
+      const qInput = document.getElementById("q");
+      const sexFilter = document.getElementById("sexFilter");
+      const statusFilter = document.getElementById("statusFilter");
+      const sortOrder = document.getElementById("sortOrder");
+      const clearFilterBtn = document.getElementById("clearFilter");
+      const modalEl = document.getElementById("modal");
+      const modalClose = document.getElementById("modalClose");
+
+      const allKoalas = Array.isArray(koalas) ? koalas : [];
+      const koalaById = new Map(allKoalas.map(k => [k.id, k]));
+
+      updateStats(allKoalas);
+
+      function render(list) {
+        cardsEl.innerHTML = "";
+        for (let i = 0; i < list.length; i++) {
+          const k = list[i];
+          const card = document.createElement("div");
+          card.className = "card";
+          card.style.animationDelay = `${Math.min(i * 18, 180)}ms`;
+
+          const sex = k.sex || "U";
+          const sexMark = sex === "F" ? "♀" : sex === "M" ? "♂" : "?";
+          const sexClass = sex === "F" ? "female" : sex === "M" ? "male" : "";
+          const bd = k.birthDate || "-";
+          const name = k.name || "(no name)";
+          const photoUrl = getPhotoUrl(k);
+          const status = k.status || "unknown";
+          const statusHtml = status !== "alive"
+            ? `<div class="status${status === "deceased" ? " deceased" : ""}">${status === "deceased" ? "死亡" : "不明"}</div>`
+            : "";
+
+          card.innerHTML = `
+            <div class="photo-wrap">
+              <img class="photo" src="${photoUrl}" alt="${escapeHtml(name)}">
+              <span class="sex-pill${sexClass ? ` ${sexClass}` : ""}">${sexMark}</span>
+            </div>
+            <div class="name">${escapeHtml(name)}</div>
+            <div class="sub">
+              <div>${escapeHtml(bd)}</div>
+            </div>
+            ${statusHtml}
+          `;
+
+          const photoEl = card.querySelector(".photo");
+          photoEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openModal(k, titleText, modalEl, koalaById);
+          });
+
+          card.addEventListener("click", () => {
+            location.href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
+          });
+
+          cardsEl.appendChild(card);
+        }
+        emptyEl.classList.toggle("show", list.length === 0);
+      }
+
+      function applyFilters() {
+        const q = (qInput.value || "").trim().toLowerCase();
+        const sex = sexFilter.value;
+        const status = statusFilter.value;
+        const sort = sortOrder.value;
+
+        const filtered = allKoalas.filter(k => {
+          const name = (k.name || "").toLowerCase();
+          const okName = q === "" ? true : name.includes(q);
+          const okSex = sex === "" ? true : (k.sex || "U") === sex;
+          const okStatus = status === "" ? true : (k.status || "") === status;
+          return okName && okSex && okStatus;
+        });
+
+        const sorted = [...filtered].sort((a, b) => compareKoalas(a, b, sort));
+
+        countEl.textContent = `${sorted.length} 頭表示`;
+        render(sorted);
+      }
+
+      qInput.addEventListener("input", applyFilters);
+      sexFilter.addEventListener("change", applyFilters);
+      statusFilter.addEventListener("change", applyFilters);
+      sortOrder.addEventListener("change", applyFilters);
+      clearFilterBtn.addEventListener("click", () => {
+        qInput.value = "";
+        sexFilter.value = "";
+        statusFilter.value = "alive";
+        sortOrder.value = "name";
+        applyFilters();
+        qInput.focus();
+      });
+
+      applyFilters();
+
+      modalClose.addEventListener("click", () => closeModal(modalEl));
+      modalEl.addEventListener("click", (e) => {
+        if (e.target === modalEl) closeModal(modalEl);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal(modalEl);
+      });
+    }
+
+    async function getZoo(zooId) {
+      const res = await fetch(`${API_BASE}/zoos`);
+      if (!res.ok) return null;
+      const list = await res.json();
+      if (!Array.isArray(list)) return null;
+      return list.find(z => z.id === zooId) || null;
+    }
+
+    async function getKoalasByZoo(zooId) {
+      const res = await fetch(`${API_BASE}/zoos/${encodeURIComponent(zooId)}/koalas`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      return res.json();
+    }
+
+    function compareKoalas(a, b, sort) {
+      if (sort === "birth_desc") return scoreBirth(b.birthDate) - scoreBirth(a.birthDate) || (a.name || "").localeCompare(b.name || "", "ja");
+      if (sort === "birth_asc") return scoreBirth(a.birthDate) - scoreBirth(b.birthDate) || (a.name || "").localeCompare(b.name || "", "ja");
+      return (a.name || "").localeCompare(b.name || "", "ja");
+    }
+
+    function scoreBirth(v) {
+      if (!v) return -Infinity;
+      const y = Number(String(v).slice(0, 4));
+      if (!Number.isFinite(y)) return -Infinity;
+      return y;
+    }
+
+    function updateStats(list) {
+      const alive = list.filter(k => (k.status || "") === "alive").length;
+      const female = list.filter(k => (k.sex || "U") === "F").length;
+      const male = list.filter(k => (k.sex || "U") === "M").length;
+      const unknown = list.filter(k => (k.sex || "U") === "U").length;
+
+      document.getElementById("statAlive").textContent = alive;
+      document.getElementById("statFemale").textContent = female;
+      document.getElementById("statMale").textContent = male;
+      document.getElementById("statUnknown").textContent = unknown;
+    }
+
+    function openModal(k, zooName, modalEl, koalaById) {
+      const sexMark = k.sex === "F" ? "♀ メス" : k.sex === "M" ? "♂ オス" : "不明";
+      document.getElementById("modalTitle").textContent = k.name || "コアラ詳細";
+      document.getElementById("modalPhoto").src = getPhotoUrl(k);
+      document.getElementById("modalPhoto").alt = k.name || "(no name)";
+      document.getElementById("modalName").textContent = k.name || "(no name)";
+      document.getElementById("modalSex").textContent = sexMark;
+      document.getElementById("modalBirth").textContent = k.birthDate || "-";
+      const statusEl = document.getElementById("modalStatus");
+      const statusRowEl = document.getElementById("modalStatusRow");
+      if (k.status && k.status !== "alive") {
+        statusEl.textContent = k.status === "deceased" ? "死亡" : "不明";
+        statusRowEl.style.display = "";
+      } else {
+        statusRowEl.style.display = "none";
+      }
+      document.getElementById("modalMother").innerHTML = renderParentLink(k.motherId, koalaById);
+      document.getElementById("modalFather").innerHTML = renderParentLink(k.fatherId, koalaById);
+      document.getElementById("modalPedigree").href = `./pedigree.html?koalaId=${encodeURIComponent(k.id)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
+      modalEl.classList.add("open");
+      modalEl.setAttribute("aria-hidden", "false");
+    }
+
+    function renderParentLink(id, koalaById) {
+      if (!id) return "-";
+      const parent = koalaById.get(id);
+      const label = parent?.name || id;
+      const href = `./pedigree.html?koalaId=${encodeURIComponent(id)}&depth=2&includeChildren=1&zooId=${encodeURIComponent(zooId)}`;
+      return `<a class="action" href="${escapeAttr(href)}">${escapeHtml(label)}</a>`;
+    }
+
+    function closeModal(modalEl) {
+      modalEl.classList.remove("open");
+      modalEl.setAttribute("aria-hidden", "true");
+    }
+
+    function getPhotoUrl(k) {
+      if (k.photoUrl) return k.photoUrl;
+      if (k.imageUrl) return k.imageUrl;
+      return placeholderPhoto(k.name || "Koala");
+    }
+
+    function placeholderPhoto(name) {
+      const text = (name || "Koala").slice(0, 6);
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="400" height="500">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#fdf3e8"/>
+              <stop offset="1" stop-color="#ecdcca"/>
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#g)"/>
+          <circle cx="120" cy="160" r="70" fill="#c4ae8e"/>
+          <circle cx="280" cy="160" r="70" fill="#c4ae8e"/>
+          <circle cx="200" cy="230" r="90" fill="#d9c6ad"/>
+          <circle cx="200" cy="260" r="30" fill="#7a5c3c"/>
+          <circle cx="170" cy="215" r="10" fill="#3d2a18"/>
+          <circle cx="230" cy="215" r="10" fill="#3d2a18"/>
+          <circle cx="165" cy="211" r="4" fill="white"/>
+          <circle cx="225" cy="211" r="4" fill="white"/>
+          <text x="50%" y="430" text-anchor="middle" font-size="32" fill="#6b3c18" font-family="M PLUS Rounded 1c, Noto Sans JP, sans-serif">${text}</text>
+        </svg>
+      `;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[s]));
+    }
+
+    function escapeAttr(str) {
+      return String(str).replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>

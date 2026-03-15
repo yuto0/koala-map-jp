@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>コアラマップ JP</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='7' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='25' cy='10' r='6' fill='%238b7355'/%3E%3Ccircle cx='7' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='25' cy='10' r='3.5' fill='%23c4a882'/%3E%3Ccircle cx='16' cy='18' r='12' fill='%239e8a6e'/%3E%3Cellipse cx='16' cy='20' rx='5' ry='4' fill='%235a3d2b'/%3E%3Ccircle cx='11' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='21' cy='15' r='2.5' fill='%232d1e12'/%3E%3Ccircle cx='10.5' cy='14.5' r='1' fill='white'/%3E%3Ccircle cx='20.5' cy='14.5' r='1' fill='white'/%3E%3C/svg%3E">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a2e24;
+      --ink-soft: #4a6358;
+      --paper: #faf7f2;
+      --paper-deep: #f0ebe1;
+      --card: #ffffff;
+      --line: #c8bfb0;
+      --accent: #b85c1a;
+      --accent-soft: #f3dccb;
+      --green: #2d6a4f;
+      --green-soft: #d1e8dd;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "M PLUS Rounded 1c", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(980px 600px at -10% -22%, #f5ede0 0%, transparent 62%),
+        radial-gradient(900px 540px at 110% -24%, #fdf8f1 0%, transparent 56%),
+        linear-gradient(180deg, #fdfaf5 0%, #f5ede0 100%);
+    }
+
+    header {
+      padding: 0 0 0 0;
+      border-bottom: 1px solid var(--line);
+      background: rgba(250, 247, 242, 0.92);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-stripe {
+      height: 5px;
+      background: linear-gradient(90deg, #2d6a4f 0%, #4a9a6e 35%, #c87830 65%, #b85c1a 100%);
+    }
+
+    .header-body {
+      padding: 12px 16px 12px;
+    }
+
+    .headline {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      font-size: clamp(22px, 2.7vw, 32px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-sub {
+      color: var(--ink-soft);
+      margin-top: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .stat {
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+    }
+
+    .stat strong {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .stat + .stat {
+      padding-left: 12px;
+      border-left: 1px solid var(--line);
+    }
+
+    #app {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.35fr) minmax(320px, 0.95fr);
+      gap: 12px;
+      padding: 12px;
+      min-height: calc(100vh - 96px);
+    }
+
+    .panel {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 14px 28px rgba(90, 61, 43, 0.1);
+    }
+
+    #map {
+      min-height: 420px;
+      height: 100%;
+    }
+
+    #list {
+      display: flex;
+      flex-direction: column;
+      min-height: 420px;
+      max-height: calc(100vh - 120px);
+      background:
+        linear-gradient(180deg, #fdf9f4 0%, #f5ede0 100%);
+    }
+
+    .toolbar {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(253,249,244,0.98), rgba(245,237,224,0.94));
+    }
+
+    .toolbar-row {
+      display: grid;
+      grid-template-columns: 1fr 170px;
+      gap: 8px;
+    }
+
+    .toolbar input,
+    .toolbar select,
+    .btn {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 11px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn {
+      cursor: pointer;
+      background: linear-gradient(180deg, #fdf3e8 0%, #f3dccb 100%);
+      font-weight: 800;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(184, 92, 26, 0.2);
+    }
+
+    .count-line {
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+
+    .cards {
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+      overflow: auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(90, 61, 43, 0.08);
+      opacity: 0;
+      transform: translateY(8px);
+      animation: rise 220ms ease forwards;
+      position: relative;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: linear-gradient(180deg, #c87830, #b85c1a);
+      border-radius: 16px 0 0 16px;
+    }
+
+    .card:hover { border-color: #a8957e; }
+
+    .card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(184, 92, 26, 0.22), 0 12px 20px rgba(90, 61, 43, 0.12);
+    }
+
+    @keyframes rise {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .title { font-size: 17px; font-weight: 800; letter-spacing: 0.1px; }
+    .zoo-link {
+      display: inline-block;
+      color: var(--ink);
+      text-decoration: none;
+      background: linear-gradient(180deg, #fdf3e8 0%, #f3dccb 100%);
+      border: 1px solid #d4a882;
+      border-radius: 10px;
+      padding: 4px 10px;
+      font-size: 15px;
+      font-weight: 800;
+      transition: box-shadow 120ms ease, transform 120ms ease;
+    }
+    .zoo-link:hover {
+      color: var(--accent);
+      border-color: #b85c1a;
+      box-shadow: 0 4px 12px rgba(184, 92, 26, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .official-link {
+      margin-top: 3px;
+    }
+
+    .site-link {
+      font-size: 12px;
+      color: var(--green);
+      text-decoration: none;
+      border-bottom: 1px solid var(--green-soft);
+    }
+    .site-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .koala-count {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      white-space: nowrap;
+    }
+
+    .sub { color: var(--ink-soft); margin-top: 6px; font-size: 14px; }
+    .small { color: var(--ink-soft); margin-top: 7px; font-size: 13px; line-height: 1.6; font-weight: 500; }
+
+    .popup-actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .action {
+      display: inline-block;
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+
+    .empty {
+      margin: 12px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      text-align: center;
+      display: none;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,0.86);
+    }
+
+    .empty.show { display: block; }
+
+    .leaflet-control-attribution {
+      background: rgba(255,255,255,0.8);
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      color: var(--ink-soft);
+    }
+
+    .leaflet-popup-content-wrapper {
+      background: #fdfaf5;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 12px 24px rgba(90, 61, 43, 0.14);
+    }
+
+    .leaflet-popup-tip { background: #fdfaf5; }
+
+    #map .leaflet-tile { filter: none; }
+
+    .popup-card {
+      min-width: 280px;
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      gap: 10px;
+      align-items: center;
+      position: relative;
+      padding: 0 26px;
+    }
+
+    .popup-photo {
+      width: 84px;
+      height: 104px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+      background: #f0ebe1;
+    }
+
+    .popup-title { font-weight: 800; font-size: 14px; }
+    .popup-sub { margin-top: 4px; color: var(--ink-soft); font-size: 13px; line-height: 1.5; }
+    .popup-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid #d4a882;
+      background: #fdf3e8;
+      color: var(--accent);
+      font-size: 15px;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+    .popup-nav.prev { left: -2px; }
+    .popup-nav.next { right: -2px; }
+    .popup-nav:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    a { color: inherit; }
+
+    @media (max-width: 980px) {
+      #app {
+        grid-template-columns: 1fr;
+      }
+
+      #map {
+        min-height: 52vh;
+      }
+
+      #list {
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header { padding: 14px 12px 12px; }
+      #app { padding: 10px; gap: 10px; }
+      .toolbar-row,
+      .btn-row { grid-template-columns: 1fr; }
+      .cards { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-stripe"></div>
+    <div class="header-body">
+      <div class="headline">
+        <div>
+          <h1 class="brand-title">
+            <svg width="30" height="30" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="7" cy="10" r="6" fill="#8b7355"/>
+              <circle cx="25" cy="10" r="6" fill="#8b7355"/>
+              <circle cx="7" cy="10" r="3.5" fill="#c4a882"/>
+              <circle cx="25" cy="10" r="3.5" fill="#c4a882"/>
+              <circle cx="16" cy="18" r="12" fill="#9e8a6e"/>
+              <ellipse cx="16" cy="20" rx="5" ry="4" fill="#5a3d2b"/>
+              <circle cx="11" cy="15" r="2.5" fill="#2d1e12"/>
+              <circle cx="21" cy="15" r="2.5" fill="#2d1e12"/>
+              <circle cx="10.5" cy="14.5" r="1" fill="white"/>
+              <circle cx="20.5" cy="14.5" r="1" fill="white"/>
+            </svg>
+            コアラマップ JP
+          </h1>
+          <div class="brand-sub">コアラ名で検索して、どの動物園にいるかを確認</div>
+        </div>
+        <div class="hero-stats">
+          <span id="statZoos" class="stat"><strong>動物園</strong>読み込み中</span>
+          <span id="statKoalas" class="stat"><strong>登録コアラ</strong>読み込み中</span>
+          <span id="statUpdated" class="stat"><strong>最終確認</strong>-</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="app">
+    <section class="panel">
+      <div id="map"></div>
+    </section>
+
+    <section id="list" class="panel">
+      <div class="toolbar">
+        <div class="toolbar-row">
+          <input id="q" type="search" placeholder="コアラ名で検索（例: ティリー）" />
+          <select id="sortOrder">
+            <option value="name">並び順: 動物園名（あいうえお）</option>
+            <option value="koalas">並び順: 登録コアラ数（多い順）</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button id="clearSearch" class="btn" type="button">検索クリア</button>
+          <button id="fitAll" class="btn" type="button">全体表示</button>
+        </div>
+        <div id="count" class="count-line">読み込み中…</div>
+      </div>
+      <div id="cards" class="cards"></div>
+      <div id="empty" class="empty">該当するコアラ名が見つかりません</div>
+    </section>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    const API_BASE = "/api";
+
+    const map = L.map("map", { zoomControl: true }).setView([36.3, 138.1], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 20,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+    }).addTo(map);
+    const PIN_ICON_URL = "./assets/leaflet_pin.png";
+
+    let allZoos = [];
+    const markersById = new Map();
+    const cardsById = new Map();
+    const koalaSummaryCache = new Map(); // zooId -> { countAll, aliveCount, koalas, sample }
+    let activeId = null;
+
+    const qInput = document.getElementById("q");
+    const sortOrder = document.getElementById("sortOrder");
+    const cardsEl = document.getElementById("cards");
+    const countEl = document.getElementById("count");
+    const emptyEl = document.getElementById("empty");
+    const clearSearchBtn = document.getElementById("clearSearch");
+    const fitAllBtn = document.getElementById("fitAll");
+    const statZoosEl = document.getElementById("statZoos");
+    const statKoalasEl = document.getElementById("statKoalas");
+    const statUpdatedEl = document.getElementById("statUpdated");
+
+    qInput.addEventListener("input", () => renderListAndMarkers());
+    sortOrder.addEventListener("change", () => renderListAndMarkers());
+    clearSearchBtn.addEventListener("click", () => {
+      qInput.value = "";
+      sortOrder.value = "name";
+      renderListAndMarkers();
+      qInput.focus();
+    });
+    fitAllBtn.addEventListener("click", () => fitToVisible());
+
+    main().catch(err => {
+      console.error(err);
+      alert("初期化に失敗しました。\n\n" + err.message);
+    });
+
+    async function main() {
+      const zoos = await getZoos();
+      if (!Array.isArray(zoos)) throw new Error("Invalid response: not an array");
+
+      allZoos = zoos.filter(z => typeof z?.lat === "number" && typeof z?.lng === "number" && !(z.lat === 0 && z.lng === 0));
+
+      for (const z of allZoos) {
+        const marker = L.marker([z.lat, z.lng], {
+          icon: createPinIcon(0)
+        }).addTo(map);
+
+        marker.bindTooltip(escapeHtml(z.name || "(no name)"), { direction: "top", offset: [0, -16] });
+        marker.bindPopup(buildPopupHtml(z, { loading: true }), { autoPan: false });
+        marker.on("click", () => focusZoo(z.id));
+        markersById.set(z.id, marker);
+      }
+
+      await prefetchKoalaSummaries(allZoos, 4);
+      updateHeaderStats();
+      renderListAndMarkers();
+      fitToVisible();
+    }
+
+    function getFilteredAndSortedZoos() {
+      const q = (qInput.value || "").trim().toLowerCase();
+      const sort = sortOrder.value;
+
+      const filtered = allZoos.filter(z => {
+        if (q === "") return true;
+        const summary = koalaSummaryCache.get(z.id);
+        const koalas = Array.isArray(summary?.koalas) ? summary.koalas : [];
+        return koalas.some(k => (k?.name || "").toLowerCase().includes(q));
+      });
+
+      const sorted = [...filtered].sort((a, b) => {
+        if (sort === "koalas") {
+          const ac = koalaSummaryCache.get(a.id)?.countAll ?? -1;
+          const bc = koalaSummaryCache.get(b.id)?.countAll ?? -1;
+          if (bc !== ac) return bc - ac;
+        }
+        return (a.name || "").localeCompare(b.name || "", "ja");
+      });
+
+      return sorted;
+    }
+
+    function renderListAndMarkers() {
+      const filtered = getFilteredAndSortedZoos();
+
+      countEl.textContent = `${filtered.length} 園表示`;
+      emptyEl.classList.toggle("show", filtered.length === 0);
+
+      cardsEl.innerHTML = "";
+      cardsById.clear();
+
+      for (let i = 0; i < filtered.length; i++) {
+        const z = filtered[i];
+        const card = buildCard(z, i);
+        cardsEl.appendChild(card);
+        cardsById.set(z.id, card);
+      }
+
+      for (const m of markersById.values()) {
+        map.removeLayer(m);
+      }
+      for (const z of filtered) {
+        const m = markersById.get(z.id);
+        if (m) {
+          applyMarkerStyle(m, koalaSummaryCache.get(z.id));
+          m.addTo(map);
+        }
+      }
+
+      if (activeId && !filtered.some(z => z.id === activeId)) {
+        setActive(null);
+      }
+    }
+
+    function buildCard(z, i) {
+      const el = document.createElement("div");
+      el.className = "card";
+      el.dataset.id = z.id;
+      el.style.animationDelay = `${Math.min(i * 20, 180)}ms`;
+
+      const summary = koalaSummaryCache.get(z.id);
+      const aliveKoalas = Array.isArray(summary?.aliveKoalas) ? summary.aliveKoalas : [];
+      const aliveCount = summary?.aliveCount;
+      const place = [z.pref, z.city].filter(Boolean).join(" ");
+      const url = z.officialUrl ? z.officialUrl : "";
+
+      const q = (qInput.value || "").trim().toLowerCase();
+      const matchedNames = q === ""
+        ? aliveKoalas.map(k => k.name).filter(Boolean)
+        : aliveKoalas.map(k => k.name).filter(n => (n || "").toLowerCase().includes(q));
+      const displayNames = matchedNames.slice(0, 8).join(" / ");
+      const more = matchedNames.length > 8 ? ` ほか${matchedNames.length - 8}頭` : "";
+
+      const koalaBadge = typeof aliveCount === "number" ? `${aliveCount}頭` : "読込中";
+
+      el.innerHTML = `
+        <div class="row">
+          <div class="title"><a class="zoo-link" href="./zoo.html?zooId=${encodeURIComponent(z.id)}">${escapeHtml(z.name || "(no name)")}</a></div>
+          <span class="koala-count">コアラ ${escapeHtml(koalaBadge)}</span>
+        </div>
+        ${url ? `<div class="official-link"><a class="site-link" href="${escapeAttr(url)}" target="_blank" rel="noreferrer">公式サイト →</a></div>` : ""}
+        <div class="sub">${escapeHtml(place)}</div>
+        <div class="small">${displayNames ? `在籍: ${escapeHtml(displayNames)}${escapeHtml(more)}` : "在籍: 情報なし"}</div>
+      `;
+
+      for (const a of el.querySelectorAll("a")) {
+        a.addEventListener("click", (ev) => ev.stopPropagation());
+      }
+      el.addEventListener("click", () => focusZoo(z.id));
+      return el;
+    }
+
+    function focusZoo(id) {
+      const marker = markersById.get(id);
+      const zoo = allZoos.find(z => z.id === id);
+      if (!marker || !zoo) return;
+
+      setActive(id);
+      map.setView([zoo.lat, zoo.lng], 8, { animate: true });
+      openPopupWithSummary(zoo);
+    }
+
+    function setActive(id) {
+      if (activeId && cardsById.get(activeId)) cardsById.get(activeId).classList.remove("active");
+      activeId = id;
+      if (activeId && cardsById.get(activeId)) {
+        const el = cardsById.get(activeId);
+        el.classList.add("active");
+        el.scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    function fitToVisible() {
+      const points = [];
+      for (const [id, marker] of markersById.entries()) {
+        if (map.hasLayer(marker)) {
+          const z = allZoos.find(v => v.id === id);
+          if (z) points.push([z.lat, z.lng]);
+        }
+      }
+      if (points.length > 0) map.fitBounds(points, { padding: [28, 28] });
+    }
+
+    async function openPopupWithSummary(z) {
+      const marker = markersById.get(z.id);
+      if (!marker) return;
+      marker.setPopupContent(buildPopupHtml(z, { loading: true }));
+      marker.openPopup();
+      bindPopupNav(marker);
+
+      try {
+        const summary = await getKoalaSummary(z.id);
+        marker.setPopupContent(buildPopupHtml(z, summary));
+        bindPopupNav(marker);
+      } catch (err) {
+        marker.setPopupContent(buildPopupHtml(z, { error: err?.message || "failed" }));
+        bindPopupNav(marker);
+      }
+    }
+
+    function applyMarkerStyle(marker, summary) {
+      const aliveCount = summary?.aliveCount ?? 0;
+      marker.setIcon(createPinIcon(aliveCount));
+    }
+
+    function createPinIcon(aliveCount) {
+      const size = Math.min(84, 56 + (aliveCount || 0) * 3);
+      return L.icon({
+        iconUrl: PIN_ICON_URL,
+        iconSize: [size, size],
+        iconAnchor: [Math.round(size / 2), size - 2],
+        popupAnchor: [0, -Math.round(size * 0.65)],
+        tooltipAnchor: [0, -Math.round(size * 0.55)]
+      });
+    }
+
+    async function getKoalaSummary(zooId) {
+      if (koalaSummaryCache.has(zooId)) return koalaSummaryCache.get(zooId);
+      const koalas = await getKoalasByZoo(zooId, "");
+      const list = Array.isArray(koalas) ? koalas : [];
+      const aliveKoalas = list.filter(k => (k.status || "") === "alive");
+      const aliveCount = aliveKoalas.length;
+      const sample = list.find(k => k?.name) || list[0] || null;
+      const summary = { countAll: list.length, aliveCount, koalas: list, aliveKoalas, sample };
+      koalaSummaryCache.set(zooId, summary);
+      return summary;
+    }
+
+    async function getZoos() {
+      const res = await fetch(`${API_BASE}/zoos`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      return res.json();
+    }
+
+    async function getKoalasByZoo(zooId, status) {
+      const params = new URLSearchParams();
+      if (status) params.set("status", status);
+      const qs = params.toString();
+      const res = await fetch(`${API_BASE}/zoos/${encodeURIComponent(zooId)}/koalas${qs ? `?${qs}` : ""}`);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      return res.json();
+    }
+
+    async function prefetchKoalaSummaries(zoos, concurrency) {
+      const queue = [...zoos];
+      const workers = Array.from({ length: concurrency }, async () => {
+        while (queue.length > 0) {
+          const z = queue.shift();
+          if (!z) return;
+          try {
+            const summary = await getKoalaSummary(z.id);
+            const marker = markersById.get(z.id);
+            if (marker) applyMarkerStyle(marker, summary);
+          } catch {
+          }
+        }
+      });
+      await Promise.all(workers);
+    }
+
+    function updateHeaderStats() {
+      const zooCount = allZoos.length;
+      let totalKoalas = 0;
+      for (const s of koalaSummaryCache.values()) {
+        if (typeof s?.countAll === "number") totalKoalas += s.countAll;
+      }
+
+      const dates = allZoos.map(z => z.lastVerifiedAt).filter(Boolean).sort();
+      const latest = dates.length > 0 ? dates[dates.length - 1] : "-";
+
+      statZoosEl.innerHTML = `<strong>動物園</strong>${zooCount}件`;
+      statKoalasEl.innerHTML = `<strong>登録コアラ</strong>${totalKoalas > 0 ? `${totalKoalas}頭` : "集計中"}`;
+      statUpdatedEl.innerHTML = `<strong>最終確認</strong>${escapeHtml(latest)}`;
+    }
+
+    function getNeighborZooIds(centerId) {
+      // 矢印ナビはUIの並び順ではなく、経度順（西→東）で移動する。
+      const list = [...getFilteredAndSortedZoos()].sort((a, b) => {
+        const lngDiff = (a.lng || 0) - (b.lng || 0);
+        if (lngDiff !== 0) return lngDiff;
+        const latDiff = (b.lat || 0) - (a.lat || 0);
+        if (latDiff !== 0) return latDiff;
+        return (a.name || "").localeCompare(b.name || "", "ja");
+      });
+      const idx = list.findIndex(z => z.id === centerId);
+      if (idx < 0 || list.length === 0) return { prevId: "", nextId: "" };
+      if (list.length === 1) return { prevId: list[0].id, nextId: list[0].id };
+      return {
+        prevId: list[(idx - 1 + list.length) % list.length].id,
+        nextId: list[(idx + 1) % list.length].id
+      };
+    }
+
+    function bindPopupNav(marker) {
+      const popupEl = marker.getPopup()?.getElement();
+      if (!popupEl) return;
+      for (const btn of popupEl.querySelectorAll(".popup-nav")) {
+        btn.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const targetId = btn.getAttribute("data-target-id") || "";
+          if (!targetId) return;
+          focusZoo(targetId);
+        });
+      }
+    }
+
+    function buildPopupHtml(z, summary) {
+      const title = z.name || "(no name)";
+      const place = [z.pref, z.city].filter(Boolean).join(" ");
+      const verified = z.lastVerifiedAt ? `確認日: ${z.lastVerifiedAt}` : "";
+      const titleLink = z.officialUrl
+        ? `<a class="zoo-link" href="${escapeAttr(z.officialUrl)}" target="_blank" rel="noreferrer">${escapeHtml(title)}</a>`
+        : escapeHtml(title);
+      const nav = getNeighborZooIds(z.id);
+
+      let countText = "コアラ数: 読み込み中...";
+      let namesText = "";
+      let photoUrl = placeholderPhoto(title);
+      let photoAlt = title;
+      if (summary?.error) {
+        countText = "コアラ数: 取得失敗";
+      } else if (typeof summary?.countAll === "number") {
+        countText = `登録コアラ: ${summary.countAll}頭（現存: ${summary.aliveCount}頭）`;
+        const names = (summary.aliveKoalas || []).map(k => k.name).filter(Boolean).slice(0, 6);
+        namesText = names.length ? `在籍: ${names.join(" / ")}` : "在籍: 情報なし";
+        if (summary.sample) {
+          photoUrl = koalaPhotoUrl(summary.sample);
+          photoAlt = summary.sample.name || title;
+        }
+      }
+
+      return `
+        <div class="popup-card">
+          <button class="popup-nav prev" data-target-id="${escapeAttr(nav.prevId)}" ${nav.prevId ? "" : "disabled"} aria-label="前の動物園">◀</button>
+          <button class="popup-nav next" data-target-id="${escapeAttr(nav.nextId)}" ${nav.nextId ? "" : "disabled"} aria-label="次の動物園">▶</button>
+          <img class="popup-photo" src="${photoUrl}" alt="${escapeAttr(photoAlt)}">
+          <div>
+            <div class="popup-title">${titleLink}</div>
+            <div class="popup-sub">${escapeHtml(place)}</div>
+            <div class="popup-sub">${escapeHtml(verified)}</div>
+            <div class="popup-sub">${escapeHtml(countText)}</div>
+            <div class="popup-sub">${escapeHtml(namesText)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function koalaPhotoUrl(k) {
+      if (k?.photoUrl) return k.photoUrl;
+      if (k?.imageUrl) return k.imageUrl;
+      return placeholderPhoto(k?.name || "Koala");
+    }
+
+    function placeholderPhoto(label) {
+      const text = (label || "Koala").slice(0, 6);
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="240" height="300">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#fdf3e8"/>
+              <stop offset="1" stop-color="#ecdcca"/>
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#g)"/>
+          <ellipse cx="120" cy="230" rx="72" ry="18" fill="#d9c4ab"/>
+          <circle cx="74" cy="95" r="40" fill="#c4ae8e"/>
+          <circle cx="166" cy="95" r="40" fill="#c4ae8e"/>
+          <circle cx="120" cy="134" r="56" fill="#d9c6ad"/>
+          <circle cx="102" cy="130" r="9" fill="#3d2a18"/>
+          <circle cx="138" cy="130" r="9" fill="#3d2a18"/>
+          <circle cx="100" cy="127" r="3" fill="#ffffff"/>
+          <circle cx="136" cy="127" r="3" fill="#ffffff"/>
+          <ellipse cx="120" cy="156" rx="16" ry="13" fill="#7a5c3c"/>
+          <ellipse cx="93" cy="150" rx="8" ry="5" fill="#f5c4bc"/>
+          <ellipse cx="147" cy="150" rx="8" ry="5" fill="#f5c4bc"/>
+          <path d="M106 174 Q120 186 134 174" stroke="#8c5a30" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <text x="50%" y="262" text-anchor="middle" font-size="22" fill="#6b3c18" font-family="M PLUS Rounded 1c, Zen Kaku Gothic New, sans-serif">${text}</text>
+        </svg>
+      `;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[s]));
+    }
+
+    function escapeAttr(str) {
+      return String(str).replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
